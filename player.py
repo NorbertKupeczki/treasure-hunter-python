@@ -50,7 +50,7 @@ class Player():
         self.sprite.x = self.sprite.x + self.player_speed * self.velocity.x * game_time.fixed_timestep
         self.sprite.y = self.sprite.y + self.player_speed * self.velocity.y * game_time.fixed_timestep
 
-    def set_sprite(self, x_start: int, width: int):
+    def set_sprite(self, x_start, width):
         self.sprite.src_rect[pyasge.Sprite.SourceRectIndex.START_X] = x_start
         self.sprite.src_rect[pyasge.Sprite.SourceRectIndex.LENGTH_X] = width
         self.sprite.width = width

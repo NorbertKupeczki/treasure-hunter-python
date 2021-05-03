@@ -9,15 +9,8 @@ class GamePlay(GameState):
     def __init__(self, data):
         super().__init__(data)
 
-
-
         self.map = Map('1') # added
         self.desired_path = [] # added
-
-
-
-
-
 
         # register the key handler for this class
         self.data.inputs.addCallback(pyasge.EventType.E_KEY, self.input)
