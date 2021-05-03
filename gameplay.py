@@ -25,6 +25,12 @@ class GamePlay(GameState):
         self.ui_text.position = [512 - self.ui_text.width * 0.5, 35]
         self.ui_text.colour = pyasge.COLOURS.AQUA
 
+
+        # create a list of bullets
+        self.bullets_list = []
+        self.bullets_index = 0
+        self.bullets_max = 5
+
         # track key states
         self.keys = {
             pyasge.KEYS.KEY_A: False,
@@ -33,6 +39,7 @@ class GamePlay(GameState):
             pyasge.KEYS.KEY_S: False,
             pyasge.KEYS.KEY_EQUAL: False,
             pyasge.KEYS.KEY_MINUS: False,
+            pyasge.KEYS.KEY_SPACE: False,
         }
 
 
