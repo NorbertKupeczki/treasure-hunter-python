@@ -1,0 +1,70 @@
+
+{
+    "1":[
+    {
+      "layer_nums" : 3,
+      "size" : "6 8",
+
+      "Layers":
+      [
+        {
+          "layer_name" : "ground",
+          "num_tiles" : 0,
+          "tile_cords" : "all",
+          "tile_text_index" : 0,
+          "tile_text_filename" : "data/TileSet data/Tiles/Colored/tile_0015.png",
+          "layer_cost" : 1
+        },
+
+        {
+          "layer_name" : "something",
+          "num_tiles" : 3,
+          "tile_cords" : "2-1 2-2 2-3",
+          "tile_text_index" : [1,1,0],
+          "tile_text_filename" : ["data/TileSet data/Tiles/Colored/tile_0001.png", "data/TileSet data/Tiles/Colored/tile_0001.png"],
+          "layer_cost" : 10
+        },
+
+        {
+          "layer_name" : "details",
+          "num_tiles" : 3,
+          "tile_cords" : "3-5 4-1 4-2",
+          "tile_text_index" : [1,0,1],
+          "tile_text_filename" : ["data/TileSet data/Tiles/Colored/tile_0024.png", "data/TileSet data/Tiles/Colored/tile_0024.png"],
+          "layer_cost" : 100
+        }
+      ]
+
+    }
+    ],
+
+     "2":[
+    {
+      "layer_nums" : 2,
+      "size" : "4 5",
+
+      "Layers":
+      [
+        {
+          "layer_name" : "wall",
+          "num_tiles" : 0,
+          "tile_cords" : "all",
+          "tile_text_index" : 0,
+          "tile_text_filename" : "Data/PNG/Retina/roadTexture_25.png",
+          "layer_cost" : 1
+        },
+
+        {
+          "layer_name" : "non details",
+          "num_tiles" : 3,
+          "tile_cords" : "1-1 1-2 1-3",
+          "tile_text_index" : [1,1,0],
+          "tile_text_filename" : ["Data/PNG/Retina/roadTexture_22.png", "Data/PNG/Retina/roadTexture_28.png"],
+          "layer_cost" : 10
+        }
+
+      ]
+
+    }
+    ]
+}
