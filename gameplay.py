@@ -1,5 +1,6 @@
 import pyasge
 from gamestate import GameState, GameStateID
+from player import Player
 
 
 class GamePlay(GameState):
@@ -8,12 +9,8 @@ class GamePlay(GameState):
 
         # register the key handler for this class
         self.data.inputs.addCallback(pyasge.EventType.E_KEY, self.input)
-
-        # create a zombie player sprite
-        self.sprite = pyasge.Sprite()
-        self.sprite.loadTexture("/data/images/character_zombie_idle.png")
-        self.sprite.x = 512 - self.sprite.width * 0.5
-        self.sprite.y = 384 - self.sprite.height * 0.5
+        self.player = Player(self.data.screen_size)
+        self.player.set_sprite(402, 50)
 
         # create ui text instance
         self.ui_text = pyasge.Text(self.data.fonts['kenvector'], "BRAINZZZZ!!!")
@@ -35,16 +32,9 @@ class GamePlay(GameState):
             self.keys[event.key] = event.action is pyasge.KEYS.KEY_PRESSED
 
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
-        if self.keys[pyasge.KEYS.KEY_W]:
-            self.sprite.y = self.sprite.y - 500 * game_time.fixed_timestep
-        if self.keys[pyasge.KEYS.KEY_S]:
-            self.sprite.y = self.sprite.y + 500 * game_time.fixed_timestep
-        if self.keys[pyasge.KEYS.KEY_A]:
-            self.sprite.x = self.sprite.x - 500 * game_time.fixed_timestep
-        if self.keys[pyasge.KEYS.KEY_D]:
-            self.sprite.x = self.sprite.x + 500 * game_time.fixed_timestep
+        self.player.move_player(game_time, self.keys, self.data.inputs.getGamePad(0))
         return GameStateID.GAMEPLAY
 
     def render(self, game_time: pyasge.GameTime) -> None:
-        self.data.renderer.render(self.sprite)
+        self.data.renderer.render(self.player.sprite)
         self.data.renderer.render(self.ui_text)

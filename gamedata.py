@@ -12,3 +12,4 @@ class GameData:
         self.fonts = {}
         self.inputs = None
         self.renderer = None
+        self.screen_size = {}
