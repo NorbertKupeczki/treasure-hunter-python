@@ -10,7 +10,7 @@ class Player():
         self.sprite.y = 384 - self.sprite.height * 0.5
         self.player_speed = 500
         self.velocity = pyasge.Point2D()
-        self.game_pad_enabled = False  # <-- Change this to true to switch to game pad controls instead of keyboard
+        self.game_pad_enabled = True  # <-- Change this to true to switch to game pad controls instead of keyboard
         self.screen_size = screen_size
 
     def move_player(self, game_time: pyasge.GameTime, keys, game_pad):

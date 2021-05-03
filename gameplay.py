@@ -38,19 +38,20 @@ class GamePlay(GameState):
 
     def click_event(self, event: pyasge.ClickEvent) -> None: # added
         if event.button is pyasge.MOUSE.MOUSE_BTN1:
-            if event.action is pyasge.MOUSE.BUTTON_PRESSED:
-                temp_string_x = str(event.x / 8)
-                temp_string_x = int(temp_string_x[0])
+            if event.action is pyasge.MOUSE.BUTTON_PRESSED:   # if the left click is detected
+                temp_string_x = str(event.x / 8)   # the click position in pyASGE is relative to the world map instead of the size of the screen, if we divide it by 8 we get the tile number
+                temp_string_x = int(temp_string_x.split(".")[0])   # it will most likely be a long float value, therefore by saving it as a string we are able to get the numbers before the "."
                 temp_string_y = str(event.y / 8)
-                temp_string_y = int(temp_string_y[0])
-                touple_coord = (temp_string_x, temp_string_y)
+                temp_string_y = int(temp_string_y.split(".")[0])
+                touple_coord = (temp_string_x, temp_string_y)       #save it as a touple to be sent off
 
-                if 0 <= temp_string_x < self.map.width:
+                if 0 <= temp_string_x < self.map.width:  # check if the coordinates were in the actually map and not outside of the map
                     if 0 <= temp_string_y < self.map.height:
-                        if self.map.cost_map[temp_string_y][temp_string_x] < 10000:
-                            self.desired_path = Pathfinding((0, 0), touple_coord, self.map.cost_map, self.map.width, self.map.height).decided_path
+                        if self.map.cost_map[temp_string_y][temp_string_x] < 10000:    # if the cost of the thing clicked on is higher than this amount that means
+                                                                                        # the player clicked on a wall or something so don't initiate the pathfinding
+                            self.desired_path = Pathfinding((0, 0), touple_coord, self.map.cost_map, self.map.width, self.map.height).decided_path   # call the class to give the coordinates and save everything in the array
 
-                            for i in range(len(self.desired_path)):
+                            for i in range(len(self.desired_path)):    # debugging purpose, prints out the values of the above array
                                 print(self.desired_path[i].tile)
 
 

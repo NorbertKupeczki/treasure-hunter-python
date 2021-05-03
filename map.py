@@ -12,22 +12,22 @@ class Map:
         self.loadMap(level)
 
 
-    def loadMap(self, level) -> None:
+    def loadMap(self, level) -> None:  # takes the level we want to load in
 
-        with open('Maps') as f:
+        with open('Maps') as f:  # open the json type file named Maps
             data = json.load(f)
 
-        for Data in data[level]:
-            self.layers = [Layer() for i in range(Data['layer_nums'])]
+        for Data in data[level]:    # search in the json file for an array with the name of the level
+            self.layers = [Layer() for i in range(Data['layer_nums'])]     # creates a number of Layer() obj depending on what is stated in the json file
 
-            layer_index = 0
+            layer_index = 0    # needed to traverse the self.layers[] array so we can access the specific layer obj
 
-            size_string = Data['size']
-            self.width = int(size_string.split()[0])
+            size_string = Data['size']  # the size of the map is saved as a string
+            self.width = int(size_string.split()[0]) # python can split strings when it detects spaces
             self.height = int(size_string.split()[1])
-            self.cost_map = [[0 for i in range(self.width)] for j in range(self.height)]
+            self.cost_map = [[0 for i in range(self.width)] for j in range(self.height)]  # creates a 2d map for the costs
 
-            for layer in Data['Layers']:
+            for layer in Data['Layers']: # for every layer array in the Json file
 
                 self.layers[layer_index].name = layer['layer_name']
 
@@ -49,8 +49,8 @@ class Map:
 
                     for x in range(int(layer['num_tiles'])):
                         temp_string = str(layer['tile_cords']).split()[x]
-                        x_coord = int(temp_string[0])
-                        y_coord = int(temp_string[2])
+                        x_coord = int(temp_string.split("-")[0])
+                        y_coord = int(temp_string.split("-")[1])
 
                         self.layers[layer_index].tiles[x].coordinate = (x_coord, y_coord)
                         self.layers[layer_index].tiles[x].load(layer['tile_text_filename'][layer['tile_text_index'][x]])
@@ -62,5 +62,5 @@ class Map:
 
     def render(self, renderer: pyasge.Renderer) -> None:
 
-        for x in range(len(self.layers)):
+        for x in range(len(self.layers)):# for every layer send the render to them
             self.layers[x].render(renderer)
