@@ -53,7 +53,9 @@ class Player():
     def set_sprite(self, x_start, width):
         self.sprite.src_rect[pyasge.Sprite.SourceRectIndex.START_X] = x_start
         self.sprite.src_rect[pyasge.Sprite.SourceRectIndex.LENGTH_X] = width
+
         self.sprite.width = width
+
 
     def check_collision(self, dx, dy):  # <--- Checks collision with the edge of the screen
         if self.sprite.x + dx > (self.screen_size[0] - 46):

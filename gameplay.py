@@ -9,7 +9,7 @@ class GamePlay(GameState):
     def __init__(self, data):
         super().__init__(data)
 
-        self.map = Map('1') # added
+        self.map = Map('2') # added
         self.desired_path = [] # added
 
         # register the key handler for this class
@@ -43,7 +43,7 @@ class GamePlay(GameState):
                 temp_string_x = int(temp_string_x.split(".")[0])   # it will most likely be a long float value, therefore by saving it as a string we are able to get the numbers before the "."
                 temp_string_y = str(event.y / 8)
                 temp_string_y = int(temp_string_y.split(".")[0])
-                touple_coord = (temp_string_x, temp_string_y)       #save it as a touple to be sent off
+                touple_coord = (temp_string_x, temp_string_y)       # save it as a touple to be sent off
 
                 if 0 <= temp_string_x < self.map.width:  # check if the coordinates were in the actually map and not outside of the map
                     if 0 <= temp_string_y < self.map.height:
@@ -58,6 +58,16 @@ class GamePlay(GameState):
     def input(self, event: pyasge.KeyEvent) -> None:
         if event.action is not pyasge.KEYS.KEY_REPEATED:
             self.keys[event.key] = event.action is pyasge.KEYS.KEY_PRESSED
+
+        if event.key is pyasge.KEYS.KEY_Q:
+            if event.action is pyasge.KEYS.KEY_PRESSED:
+                print("loading map 1")
+                self.map = Map('1')
+
+        if event.key is pyasge.KEYS.KEY_E:
+            if event.action is pyasge.KEYS.KEY_PRESSED:
+                print("loading map 2")
+                self.map = Map('2')
 
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
         self.player.move_player(game_time, self.keys, self.data.inputs.getGamePad(0))
