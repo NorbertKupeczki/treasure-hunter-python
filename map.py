@@ -28,7 +28,7 @@ class Map:
             self.cost_map = [[0 for i in range(self.width)] for j in range(self.height)]  # creates a 2d map for the costs
 
             for layer in Data['Layers']: # for every layer array in the Json file
-
+                self.layers[layer_index].passable_t = layer['walk-through']
                 self.layers[layer_index].name = layer['layer_name']
                 self.layers[layer_index].layer_cost = layer['layer_cost']
 

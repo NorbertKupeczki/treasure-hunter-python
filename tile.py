@@ -9,6 +9,7 @@ class MapTile:
 
     def load(self, filename: str, text_x: int) -> None:
         self.sprite.loadTexture(filename)
+
         text_x -= 1
 
         temp_string_x = str(text_x / 14)
