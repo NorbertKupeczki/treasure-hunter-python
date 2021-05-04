@@ -2,16 +2,17 @@ import pyasge
 from typing import Tuple
 
 
-class Player():
+class Player:
     def __init__(self, screen_size: Tuple[int, int]):
         self.sprite = pyasge.Sprite()
+        self.screen_size = screen_size
         self.sprite.loadTexture("/data/images/man_spritesheet.png")
-        self.sprite.x = 512 - self.sprite.width * 0.5
-        self.sprite.y = 384 - self.sprite.height * 0.5
+        self.set_sprite(402, 50)
+        self.sprite.x = screen_size[0] * 0.5 - self.sprite.width * 0.5
+        self.sprite.y = screen_size[1] * 0.5 - self.sprite.height * 0.5
         self.player_speed = 500
         self.velocity = pyasge.Point2D()
-        self.game_pad_enabled = True  # <-- Change this to true to switch to game pad controls instead of keyboard
-        self.screen_size = screen_size
+        self.game_pad_enabled = False  # <-- Change this to true to switch to game pad controls instead of keyboard
 
     def move_player(self, game_time: pyasge.GameTime, keys, game_pad):
         if keys[pyasge.KEYS.KEY_W]:

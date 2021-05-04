@@ -5,9 +5,11 @@ from player import Player
 from map import Map
 from A_star_pathfinding import Pathfinding
 
+
 class GamePlay(GameState):
     def __init__(self, data):
         super().__init__(data)
+        self.id = GameStateID.GAMEPLAY
 
         self.map = Map('1') # added
         self.desired_path = [] # added
@@ -15,15 +17,15 @@ class GamePlay(GameState):
         # register the key handler for this class
         self.data.inputs.addCallback(pyasge.EventType.E_KEY, self.input)
         self.player = Player(self.data.screen_size)
-        self.player.set_sprite(402, 50)
 
         # register the mouse handler for this class # added
         self.data.inputs.addCallback(pyasge.EventType.E_MOUSE_CLICK, self.click_event)  # added
 
         # create ui text instance
-        self.ui_text = pyasge.Text(self.data.fonts['kenvector'], "BRAINZZZZ!!!")
-        self.ui_text.position = [512 - self.ui_text.width * 0.5, 35]
-        self.ui_text.colour = pyasge.COLOURS.AQUA
+        self.ui_text = pyasge.Text(self.data.fonts['kenvector'], "DEMO")
+        self.ui_text.position = [self.data.screen_size[0] * 0.5 - self.ui_text.width * 0.5, self.data.screen_size[1] - 5]
+        self.ui_text.colour = pyasge.COLOURS.RED
+        self.ui_text.z_order = 2
 
         # track key states
         self.keys = {
@@ -31,10 +33,10 @@ class GamePlay(GameState):
             pyasge.KEYS.KEY_D: False,
             pyasge.KEYS.KEY_W: False,
             pyasge.KEYS.KEY_S: False,
-            pyasge.KEYS.KEY_EQUAL: False,
-            pyasge.KEYS.KEY_MINUS: False,
+            pyasge.KEYS.KEY_1: False,
+            pyasge.KEYS.KEY_2: False,
+            pyasge.KEYS.KEY_ESCAPE: False
         }
-
 
     def click_event(self, event: pyasge.ClickEvent) -> None: # added
         if event.button is pyasge.MOUSE.MOUSE_BTN1:
@@ -54,18 +56,23 @@ class GamePlay(GameState):
                             for i in range(len(self.desired_path)):    # debugging purpose, prints out the values of the above array
                                 print(self.desired_path[i].tile)
 
-
     def input(self, event: pyasge.KeyEvent) -> None:
         if event.action is not pyasge.KEYS.KEY_REPEATED:
             self.keys[event.key] = event.action is pyasge.KEYS.KEY_PRESSED
 
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
-        self.player.move_player(game_time, self.keys, self.data.inputs.getGamePad(0))
+        if self.keys[pyasge.KEYS.KEY_ESCAPE]:
+            return GameStateID.EXIT
+        elif self.keys[pyasge.KEYS.KEY_1]:
+            return GameStateID.GAME_OVER
+        elif self.keys[pyasge.KEYS.KEY_2]:
+            return GameStateID.WINNER_WINNER
+        else:
+            self.player.move_player(game_time, self.keys, self.data.inputs.getGamePad(0))
         return GameStateID.GAMEPLAY
 
     def render(self, game_time: pyasge.GameTime) -> None:
 
-        self.map.render(self.data.renderer) # added
-
+        self.map.render(self.data.renderer)  # added
         self.data.renderer.render(self.player.sprite)
         self.data.renderer.render(self.ui_text)
