@@ -36,7 +36,8 @@ class GamePlay(GameState):
             pyasge.KEYS.KEY_G: False,
             pyasge.KEYS.KEY_1: False,
             pyasge.KEYS.KEY_2: False,
-            pyasge.KEYS.KEY_ESCAPE: False
+            pyasge.KEYS.KEY_ESCAPE: False,
+            pyasge.KEYS.KEY_SPACE: False
         }
 
     def click_event(self, event: pyasge.ClickEvent) -> None: # added
@@ -82,7 +83,12 @@ class GamePlay(GameState):
                 else:
                     print("No game pad connected!")
 
+        if self.keys[pyasge.KEYS.KEY_SPACE]:
+            if event.action is pyasge.KEYS.KEY_PRESSED:
+                self.player.shoot()
+
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
+        self.player.projectiles.update_projectiles(game_time)
         if self.keys[pyasge.KEYS.KEY_ESCAPE]:
             return GameStateID.EXIT
         elif self.keys[pyasge.KEYS.KEY_1]:
@@ -96,5 +102,6 @@ class GamePlay(GameState):
     def render(self, game_time: pyasge.GameTime) -> None:
 
         self.map.render(self.data.renderer)  # added
+        self.player.render_bullets(self.data.renderer)
         self.data.renderer.render(self.player.sprite)
         self.data.renderer.render(self.ui_text)
