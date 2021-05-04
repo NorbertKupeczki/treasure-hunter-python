@@ -33,6 +33,7 @@ class GamePlay(GameState):
             pyasge.KEYS.KEY_D: False,
             pyasge.KEYS.KEY_W: False,
             pyasge.KEYS.KEY_S: False,
+            pyasge.KEYS.KEY_G: False,
             pyasge.KEYS.KEY_1: False,
             pyasge.KEYS.KEY_2: False,
             pyasge.KEYS.KEY_ESCAPE: False
@@ -69,6 +70,17 @@ class GamePlay(GameState):
             if event.action is pyasge.KEYS.KEY_PRESSED:
                 print("loading map 2")
                 self.map = Map('2')
+
+        # Turn game pad ON/OFF if game pad is connected
+        if self.keys[pyasge.KEYS.KEY_G]:
+            if event.action is pyasge.KEYS.KEY_PRESSED:
+                if self.data.inputs.getGamePad(0).connected:
+                    if self.player.toggle_game_pad():
+                        print("Game pad controls enabled")
+                    else:
+                        print("Game pad controls disabled")
+                else:
+                    print("No game pad connected!")
 
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
         if self.keys[pyasge.KEYS.KEY_ESCAPE]:
