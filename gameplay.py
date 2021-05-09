@@ -1,6 +1,7 @@
 import pyasge
 from gamestate import GameState, GameStateID
 from player import Player
+from hud import HUD
 
 from map import Map
 from A_star_pathfinding import Pathfinding
@@ -14,18 +15,14 @@ class GamePlay(GameState):
         self.map = Map('2') # added
         self.desired_path = [] # added
 
+        self.hud = HUD(data)
+
         # register the key handler for this class
         self.data.inputs.addCallback(pyasge.EventType.E_KEY, self.input)
-        self.player = Player(self.data.screen_size)
+        self.player = Player(pyasge.Point2D(64, 64))
 
         # register the mouse handler for this class # added
         self.data.inputs.addCallback(pyasge.EventType.E_MOUSE_CLICK, self.click_event)  # added
-
-        # create ui text instance
-        self.ui_text = pyasge.Text(self.data.fonts['kenvector'], "DEMO")
-        self.ui_text.position = [self.data.screen_size[0] * 0.5 - self.ui_text.width * 0.5, self.data.screen_size[1] - 5]
-        self.ui_text.colour = pyasge.COLOURS.RED
-        self.ui_text.z_order = 2
 
         # track key states
         self.keys = {
@@ -100,8 +97,10 @@ class GamePlay(GameState):
         return GameStateID.GAMEPLAY
 
     def render(self, game_time: pyasge.GameTime) -> None:
+        corner = self.data.camera.look_at(self.player.get_sprite())
+        self.data.renderer.setProjectionMatrix(self.data.camera.camera.view)
+        self.hud.render_hud(corner)
 
         self.map.render(self.data.renderer)  # added
         self.player.render_bullets(self.data.renderer)
         self.data.renderer.render(self.player.sprite)
-        self.data.renderer.render(self.ui_text)

@@ -31,4 +31,5 @@ class GameOver(GameState):
             return GameStateID.GAME_OVER
 
     def render(self, game_time: pyasge.GameTime) -> None:
+        self.data.renderer.setProjectionMatrix(self.data.camera.default_view)
         self.data.renderer.render(self.start_text)

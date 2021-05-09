@@ -15,8 +15,8 @@ class Layer:
                 x.passable = False
 
         for x in self.tiles:
-            x.sprite.y = 8 * x.coordinate[1]
-            x.sprite.x = 8 * x.coordinate[0]
+            x.sprite.y = 64 * x.coordinate[1]  # Magnified for testing purposes, original scalar was 8 - Norbert
+            x.sprite.x = 64 * x.coordinate[0]  # Magnified for testing purposes, original scalar was 8 - Norbert
 
 
     def render(self, renderer: pyasge.Renderer) -> None:

@@ -13,3 +13,4 @@ class GameData:
         self.inputs = None
         self.renderer = None
         self.screen_size = {}
+        self.camera = None

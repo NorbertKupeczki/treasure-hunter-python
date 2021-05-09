@@ -6,6 +6,7 @@ from startmenu import StartMenu
 from gameover import GameOver
 from winnerwinner import WinnerWinner
 from gamestate import GameStateID
+from camera import Camera
 
 
 class MyASGEGame(pyasge.ASGEGame):
@@ -21,6 +22,7 @@ class MyASGEGame(pyasge.ASGEGame):
         self.data.renderer = self.renderer
         self.data.fonts['kenvector'] = self.renderer.loadFont("/data/fonts/kenvector_future.ttf", 40)
         self.data.screen_size = settings.window_width, settings.window_height
+        self.data.camera = Camera()
         self.active_state = StartMenu(self.data)
 
     def update(self, game_time: pyasge.GameTime) -> None:

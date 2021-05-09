@@ -21,6 +21,6 @@ class MapTile:
         self.sprite.src_rect[pyasge.Sprite.SourceRectIndex.START_Y] = temp_string_x * 8
         self.sprite.src_rect[pyasge.Sprite.SourceRectIndex.LENGTH_Y] = 8
 
-        self.sprite.width = 8
-        self.sprite.height = 8
+        self.sprite.width = 64  # Magnified for testing purposes, original scalar was 8 - Norbert
+        self.sprite.height = 64  # Magnified for testing purposes, original scalar was 8 - Norbert
 
