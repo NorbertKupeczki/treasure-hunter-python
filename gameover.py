@@ -7,7 +7,7 @@ class GameOver(GameState):
         super().__init__(data)
         self.id = GameStateID.GAME_OVER
 
-        self.start_text = pyasge.Text(self.data.fonts['kenvector'], "GAME OVER\n\n ENTER - Start Menu\n ESC - Quit")
+        self.start_text = pyasge.Text(self.data.fonts['main_text'], "GAME OVER\n\n ENTER - Start Menu\n ESC - Quit")
         self.start_text.position = [self.data.screen_size[0] * 0.5 - self.start_text.width * 0.5, self.data.screen_size[1] * 0.5 - self.start_text.height * 0.5]
         self.start_text.colour = pyasge.COLOURS.RED
 
