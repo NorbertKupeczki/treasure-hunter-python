@@ -39,7 +39,7 @@ class Map:
                 for data in layer["data"]:
                     if data != 0:
                         self.layers[layer_index].tiles.append(MapTile((x, y)))
-                        self.layers[layer_index].tiles[iteration].load("data/TileSet data/Tilemap/colored_tilemap_packed.png", data)
+                        self.layers[layer_index].tiles[iteration].load("data/tilesheet_complete.png", data)
                         self.cost_map[y][x] += self.layers[layer_index].layer_cost
                         iteration += 1
 

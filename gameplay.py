@@ -12,12 +12,14 @@ class GamePlay(GameState):
         super().__init__(data)
         self.id = GameStateID.GAMEPLAY
 
+
         self.data.map = Map('2')  # added
         self.desired_path = []  # added
 
         # initialising HUD and the player
         self.hud = HUD(data)
         self.player = Player(data, pyasge.Point2D(128, 128))
+
 
         # register the key handler for this class
         self.data.inputs.addCallback(pyasge.EventType.E_KEY, self.input)
