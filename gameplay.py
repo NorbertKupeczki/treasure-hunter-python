@@ -7,6 +7,7 @@ from map import Map
 from A_star_pathfinding import Pathfinding
 
 
+
 class GamePlay(GameState):
     def __init__(self, data):
         super().__init__(data)
