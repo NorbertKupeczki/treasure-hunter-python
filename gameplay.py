@@ -6,6 +6,8 @@ from hud import HUD
 from map import Map
 from A_star_pathfinding import Pathfinding
 
+from gem import Gem
+
 
 
 class GamePlay(GameState):
@@ -25,6 +27,10 @@ class GamePlay(GameState):
 
         # register the mouse handler for this class # added
         self.data.inputs.addCallback(pyasge.EventType.E_MOUSE_CLICK, self.click_event)  # added
+
+        # initialise gems array & score
+        self.gemsArray = [Gem(pyasge.Point2D(140, 300)), Gem(pyasge.Point2D(720, 400)), Gem(pyasge.Point2D(500, 800))]
+        self.score = 0
 
         # track key states
         self.keys = {
@@ -97,6 +103,14 @@ class GamePlay(GameState):
                 self.hud.coords_on = not self.hud.coords_on
 
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
+
+        print("SCORE: " + str(self.score))
+
+        for i in range (0, len(self.gemsArray)):
+            self.gemsArray[i].collectGem(self.player.sprite)
+            if (self.gemsArray[i].scoreFlag == True):
+                self.score += self.gemsArray[i].value
+
         self.player.projectiles.update_projectiles(game_time)
         if self.keys[pyasge.KEYS.KEY_ESCAPE]:
             return GameStateID.EXIT
@@ -116,3 +130,6 @@ class GamePlay(GameState):
         self.data.map.render(self.data.renderer)  # added
         self.player.render_bullets(self.data.renderer)
         self.data.renderer.render(self.player.sprite)
+        for i in range (0, len(self.gemsArray)):
+            if (self.gemsArray[i].hasBeenCollected == False):
+                self.data.renderer.render(self.gemsArray[i].sprite)
