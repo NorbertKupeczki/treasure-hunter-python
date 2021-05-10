@@ -12,14 +12,12 @@ class GamePlay(GameState):
         super().__init__(data)
         self.id = GameStateID.GAMEPLAY
 
-
-        self.data.map = Map('2')  # added
+        self.data.map = Map(str(self.data.level_selected))  # added
         self.desired_path = []  # added
 
         # initialising HUD and the player
         self.hud = HUD(data)
-        self.player = Player(data, pyasge.Point2D(128, 128))
-
+        self.player = Player(data, self.data.map.starting_location)
 
         # register the key handler for this class
         self.data.inputs.addCallback(pyasge.EventType.E_KEY, self.input)
@@ -66,15 +64,15 @@ class GamePlay(GameState):
         if event.action is not pyasge.KEYS.KEY_REPEATED:
             self.keys[event.key] = event.action is pyasge.KEYS.KEY_PRESSED
 
-        if event.key is pyasge.KEYS.KEY_Q:
-            if event.action is pyasge.KEYS.KEY_PRESSED:
-                print("loading map 1")
-                self.data.map = Map('1')
-
-        if event.key is pyasge.KEYS.KEY_E:
-            if event.action is pyasge.KEYS.KEY_PRESSED:
-                print("loading map 2")
-                self.data.map = Map('2')
+        # if event.key is pyasge.KEYS.KEY_Q:           <-- Level manager implemented, we might don't need this - Norbert
+        #     if event.action is pyasge.KEYS.KEY_PRESSED:
+        #         print("loading map 1")
+        #         self.data.map = Map('1')
+        #
+        # if event.key is pyasge.KEYS.KEY_E:
+        #     if event.action is pyasge.KEYS.KEY_PRESSED:
+        #         print("loading map 2")
+        #         self.data.map = Map('2')
 
         # Turn game pad ON/OFF if game pad is connected
         if self.keys[pyasge.KEYS.KEY_G]:

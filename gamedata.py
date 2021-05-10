@@ -1,5 +1,6 @@
 import pyasge
 
+
 class GameData:
     """ GameData stores the data that needs to be shared
 
@@ -20,3 +21,4 @@ class GameData:
         self.tile_size = int(64)
         self.world_loc = pyasge.Point2D(0, 0)
         self.tile_loc = pyasge.Point2D(0, 0)
+        self.level_selected = 1
