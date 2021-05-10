@@ -21,6 +21,7 @@ class MyASGEGame(pyasge.ASGEGame):
         self.data.inputs = self.inputs
         self.data.renderer = self.renderer
         self.data.fonts['kenvector'] = self.renderer.loadFont("/data/fonts/kenvector_future.ttf", 40)
+        self.data.fonts['hud_text'] = self.renderer.loadFont("/data/fonts/kenvector_future.ttf", 18)
         self.data.screen_size = settings.window_width, settings.window_height
         self.data.camera = Camera()
         self.active_state = StartMenu(self.data)
