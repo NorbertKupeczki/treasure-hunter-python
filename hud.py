@@ -4,17 +4,17 @@ import pyasge
 class HUD:
     def __init__(self, data):
         self.data = data
-        self.ui_text = pyasge.Text(self.data.fonts['kenvector'], "DEMO")
+        self.ui_text = pyasge.Text(self.data.fonts['main_text'], "DEMO")
         self.ui_text.colour = pyasge.COLOURS.RED
-        self.ui_text.z_order = 2
+        self.ui_text.z_order = 5
 
         self.world_coordinates = pyasge.Text(self.data.fonts['hud_text'], "World: ")
         self.world_coordinates.colour = pyasge.COLOURS.LIME
-        self.world_coordinates.z_order = 2
+        self.world_coordinates.z_order = 5
 
         self.tile_coordinates = pyasge.Text(self.data.fonts['hud_text'], "Tile: ")
         self.tile_coordinates.colour = pyasge.COLOURS.LIME
-        self.tile_coordinates.z_order = 2
+        self.tile_coordinates.z_order = 5
 
         self.coords_on = True
 

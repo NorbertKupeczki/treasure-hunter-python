@@ -10,13 +10,14 @@ class Player:
         # self.screen_size = screen_size
         self.sprite.loadTexture("/data/images/man_spritesheet.png")
         self.set_sprite(int(402), int(50))
+        self.sprite.z_order = 3
         self.sprite.x = start_pos.x
         self.sprite.y = start_pos.y
         self.player_speed = 300
         self.velocity = pyasge.Point2D()
         self.game_pad_enabled = False
         self.facing = pyasge.Point2D(0, 1)
-        self.projectiles = Projectiles()
+        self.projectiles = Projectiles(data)
 
     def move_player(self, game_time: pyasge.GameTime, keys, game_pad):
         if keys[pyasge.KEYS.KEY_W]:

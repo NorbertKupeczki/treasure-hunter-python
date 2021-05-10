@@ -17,13 +17,13 @@ class Camera:
 
         if camera_x <= 512:
             camera_x = 512
-        elif camera_x >= 2848:
-            camera_x = 2848
+        elif camera_x >= 3328:
+            camera_x = 3328
 
         if camera_y <= 384:
             camera_y = 384
-        elif camera_y >= 1520:
-            camera_y = 1520
+        elif camera_y >= 1792:
+            camera_y = 1792
 
         self.camera.lookAt(pyasge.Point2D(camera_x, camera_y))
 
