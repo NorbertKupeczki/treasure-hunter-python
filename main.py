@@ -2,6 +2,11 @@
 import pyasge
 from gamedata import GameData
 from gameplay import GamePlay
+from startmenu import StartMenu
+from gameover import GameOver
+from winnerwinner import WinnerWinner
+from gamestate import GameStateID
+from camera import Camera
 
 
 class MyASGEGame(pyasge.ASGEGame):
@@ -17,7 +22,8 @@ class MyASGEGame(pyasge.ASGEGame):
         self.data.renderer = self.renderer
         self.data.fonts['kenvector'] = self.renderer.loadFont("/data/fonts/kenvector_future.ttf", 40)
         self.data.screen_size = settings.window_width, settings.window_height
-        self.active_state = GamePlay(self.data)
+        self.data.camera = Camera()
+        self.active_state = StartMenu(self.data)
 
     def update(self, game_time: pyasge.GameTime) -> None:
         """
@@ -28,8 +34,25 @@ class MyASGEGame(pyasge.ASGEGame):
         are consistent over time.
         @param game_time: The tick and frame deltas.
         """
-        if self.active_state:
-            self.active_state.update(game_time)
+
+        # if self.active_state:
+        #     self.active_state.update(game_time)
+
+        new_state = self.active_state.update(game_time)
+        if self.active_state.id != new_state:
+            if new_state is GameStateID.EXIT:
+                self.signalExit()
+            elif new_state is GameStateID.START_MENU:
+                self.active_state = StartMenu(self.data)
+            elif new_state is GameStateID.GAMEPLAY:
+                self.active_state = GamePlay(self.data)
+            elif new_state is GameStateID.GAME_OVER:
+                self.active_state = GameOver(self.data)
+            elif new_state is GameStateID.WINNER_WINNER:
+                self.active_state = WinnerWinner(self.data)
+            else:
+                print("Unexpected error")
+                self.signalExit()
 
     def render(self, game_time: pyasge.GameTime) -> None:
         """

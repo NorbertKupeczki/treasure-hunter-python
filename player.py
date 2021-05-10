@@ -1,30 +1,38 @@
 import pyasge
 from typing import Tuple
+from projetiles import Projectiles
 
 
-class Player():
-    def __init__(self, screen_size: Tuple[int, int]):
+class Player:
+    def __init__(self, start_pos: pyasge.Point2D):
         self.sprite = pyasge.Sprite()
+        # self.screen_size = screen_size
         self.sprite.loadTexture("/data/images/man_spritesheet.png")
-        self.sprite.x = 512 - self.sprite.width * 0.5
-        self.sprite.y = 384 - self.sprite.height * 0.5
-        self.player_speed = 500
+        self.set_sprite(int(402), int(50))
+        self.sprite.x = start_pos.x
+        self.sprite.y = start_pos.y
+        self.player_speed = 300
         self.velocity = pyasge.Point2D()
         self.game_pad_enabled = False  # <-- Change this to true to switch to game pad controls instead of keyboard
-        self.screen_size = screen_size
+        self.facing = pyasge.Point2D(0, 1)
+        self.projectiles = Projectiles()
 
     def move_player(self, game_time: pyasge.GameTime, keys, game_pad):
         if keys[pyasge.KEYS.KEY_W]:
             self.velocity.y = -1
+            self.facing = pyasge.Point2D(0, -1)
         elif keys[pyasge.KEYS.KEY_S]:
             self.velocity.y = 1
+            self.facing = pyasge.Point2D(0, 1)
         else:
             self.velocity.y = 0
 
         if keys[pyasge.KEYS.KEY_A]:
             self.velocity.x = -1
+            self.facing = pyasge.Point2D(-1, 0)
         elif keys[pyasge.KEYS.KEY_D]:
             self.velocity.x = 1
+            self.facing = pyasge.Point2D(1, 0)
         else:
             self.velocity.x = 0
 
@@ -45,27 +53,45 @@ class Player():
         delta_x = self.player_speed * self.velocity.x * game_time.fixed_timestep
         delta_y = self.player_speed * self.velocity.y * game_time.fixed_timestep
 
-        self.check_collision(delta_x, delta_y)
+        # delta_xy = self.check_collision(delta_x, delta_y)
+        #
+        self.sprite.x = self.sprite.x + delta_x
+        self.sprite.y = self.sprite.y + delta_y
 
-        self.sprite.x = self.sprite.x + self.player_speed * self.velocity.x * game_time.fixed_timestep
-        self.sprite.y = self.sprite.y + self.player_speed * self.velocity.y * game_time.fixed_timestep
+    def set_sprite(self, x_start: int, width: int):
+        self.sprite.src_rect[pyasge.Sprite.SourceRectIndex.START_X] = int(x_start)
+        self.sprite.src_rect[pyasge.Sprite.SourceRectIndex.LENGTH_X] = int(width)
+        self.sprite.width = int(width)
 
-    def set_sprite(self, x_start, width):
-        self.sprite.src_rect[pyasge.Sprite.SourceRectIndex.START_X] = x_start
-        self.sprite.src_rect[pyasge.Sprite.SourceRectIndex.LENGTH_X] = width
-        self.sprite.width = width
+    def get_sprite(self) -> pyasge.Point2D:
+        return pyasge.Point2D(self.sprite.x + self.sprite.width * 0.5, self.sprite.y + self.sprite.height * 0.5)
 
-    def check_collision(self, dx, dy):  # <--- Checks collision with the edge of the screen
-        if self.sprite.x + dx > (self.screen_size[0] - 46):
-            self.sprite.x = self.screen_size[0] - 46
-            self.velocity.x = 0
-        elif self.sprite.x + dx < 0:
-            self.sprite.x = 0
-            self.velocity.x = 0
+    # def check_collision(self, dx: float, dy: float) -> Tuple[float, float]:  # <--- Checks collision with the edge of the screen
+    #     if self.sprite.x + dx > (self.screen_size[0] - self.sprite.width):
+    #         self.sprite.x = self.screen_size[0] - self.sprite.width
+    #         dx = 0
+    #     elif self.sprite.x + dx < 0:
+    #         self.sprite.x = 0
+    #         dx = 0
+    #
+    #     if self.sprite.y + dy > (self.screen_size[1] - self.sprite.height):
+    #         self.sprite.y = self.screen_size[1] - self.sprite.height
+    #         dy = 0
+    #     elif self.sprite.y + dy < 0:
+    #         self.sprite.y = 0
+    #         dy = 0
+    #
+    #     return dx, dy
 
-        if self.sprite.y + dy > (self.screen_size[1] - 62):
-            self.sprite.y = self.screen_size[1] - 62
-            self.velocity.y = 0
-        elif self.sprite.y + dy < 0:
-            self.sprite.y = 0
-            self.velocity.y = 0
+    def toggle_game_pad(self) -> bool:
+        self.game_pad_enabled = not self.game_pad_enabled
+        return self.game_pad_enabled
+
+    def shoot(self):
+        spawn_point = pyasge.Point2D(self.sprite.x + self.sprite.width * 0.5, self.sprite.y + self.sprite.height * 0.5)
+        self.projectiles.shoot(spawn_point, self.facing)
+
+    def render_bullets(self, renderer):
+        for bullets in self.projectiles.projectiles:
+            renderer.render(bullets.sprite)
+

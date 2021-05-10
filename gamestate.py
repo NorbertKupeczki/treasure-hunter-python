@@ -18,6 +18,7 @@ class GameStateID(Enum):
     GAMEPLAY = 2
     GAME_OVER = 3
     WINNER_WINNER = 4
+    EXIT = 5
 
 
 class GameState(ABC):
