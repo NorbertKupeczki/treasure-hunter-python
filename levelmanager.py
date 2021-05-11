@@ -23,7 +23,7 @@ class LevelManager(GameState):
                        pyasge.Text(self.data.fonts['main_text'], "Level 5"),
                        pyasge.Text(self.data.fonts['main_text'], "Level 6"),
                        pyasge.Text(self.data.fonts['main_text'], "Level 7"),
-                       pyasge.Text(self.data.fonts['hud_text'], "Navigate with the Q and S keys, "
+                       pyasge.Text(self.data.fonts['hud_text'], "Navigate with the W and S keys, "
                                                                 "press SPACE to select a level.")]
         self.set_texts_position(self.levels, self.data.screen_size, 0.3)
         self.levels[self.data.level_selected].colour = pyasge.COLOURS.GOLD

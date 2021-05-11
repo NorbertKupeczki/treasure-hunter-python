@@ -10,7 +10,6 @@ from A_star_pathfinding import Pathfinding
 from gem import Gem
 
 
-
 class GamePlay(GameState):
     def __init__(self, data):
         super().__init__(data)
@@ -33,6 +32,7 @@ class GamePlay(GameState):
         # initialise gems array & score
         self.gemsArray = [Gem(pyasge.Point2D(140, 300)), Gem(pyasge.Point2D(720, 400)), Gem(pyasge.Point2D(500, 800))]
         self.score = 0
+        print(self.gemsArray)
 
         # track key states
         self.keys = {
@@ -106,12 +106,13 @@ class GamePlay(GameState):
 
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
 
-        print("SCORE: " + str(self.score))
+        # print("SCORE: " + str(self.score))
 
-        for i in range (0, len(self.gemsArray)):
-            self.gemsArray[i].collectGem(self.player.sprite)
-            if (self.gemsArray[i].scoreFlag == True):
-                self.score += self.gemsArray[i].value
+        for gem in self.gemsArray:
+            if gem.check_collision(self.player.sprite):
+                self.score += gem.value
+                self.hud.update_score(self.score)
+                self.gemsArray.remove(gem)
 
         self.player.projectiles.update_projectiles(game_time)
 
@@ -137,6 +138,5 @@ class GamePlay(GameState):
         self.player.render_bullets(self.data.renderer)
         self.data.renderer.render(self.player.sprite)
         self.data.renderer.render(self.enemy.sprite)
-        for i in range (0, len(self.gemsArray)):
-            if (self.gemsArray[i].hasBeenCollected == False):
-                self.data.renderer.render(self.gemsArray[i].sprite)
+        for gem in self.gemsArray:
+            self.data.renderer.render(gem.sprite)
