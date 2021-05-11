@@ -43,5 +43,22 @@ class Enemy:
         delta_x = self.enemy_speed * self.velocity.x * game_time.fixed_timestep
         delta_y = self.enemy_speed * self.velocity.y * game_time.fixed_timestep
 
-        self.sprite.x = self.sprite.x + delta_x
-        self.sprite.y = self.sprite.y + delta_y
+        delta_xy = self.check_collision(delta_x, delta_y)
+
+        self.sprite.x = self.sprite.x + delta_xy.x
+        self.sprite.y = self.sprite.y + delta_xy.y
+
+    ## Will be removed when implementating the A* Pathfinding script
+    def check_collision(self, dx: float, dy: float) -> pyasge.Point2D():
+        bounds = [self.sprite.getWorldBounds().v1,
+                  self.sprite.getWorldBounds().v2,
+                  self.sprite.getWorldBounds().v3,
+                  self.sprite.getWorldBounds().v4]
+
+        for x in bounds:
+            if not self.is_passable(pyasge.Point2D(x.x + dx, x.y)):
+                dx = 0
+            if not self.is_passable(pyasge.Point2D(x.x, x.y + dy)):
+                dy = 0
+
+        return pyasge.Point2D(dx, dy)
