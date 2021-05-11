@@ -1,5 +1,7 @@
 import pyasge
 from fsm import FSM
+from damagestates import DamageStates
+
 from player import Player
 from projetiles import Projectiles
 
@@ -18,10 +20,13 @@ class Enemy:
         self.velocity = pyasge.Point2D()
         self.facing = pyasge.Point2D(0, 1)
 
+        self.hp = 10
+        self.fsm = FSM()
         # self.projectiles = Projectiles()
 
     def update(self):
         # self.player_location = Player.get_sprite()
+        self.fsm.update()
         pass
 
     def move_enemy(self, game_time: pyasge.GameTime, player_location: pyasge.Point2D):
@@ -48,7 +53,7 @@ class Enemy:
         self.sprite.x = self.sprite.x + delta_x
         self.sprite.y = self.sprite.y + delta_y
 
-    ## Will be removed when implementating the A* Pathfinding script
+    ## Will be removed when implementation of the A* Pathfinding script is done
     def check_collision(self, dx: float, dy: float) -> pyasge.Point2D():
         bounds = [self.sprite.getWorldBounds().v1,
                   self.sprite.getWorldBounds().v2,
