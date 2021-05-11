@@ -43,10 +43,10 @@ class Enemy:
         delta_x = self.enemy_speed * self.velocity.x * game_time.fixed_timestep
         delta_y = self.enemy_speed * self.velocity.y * game_time.fixed_timestep
 
-        delta_xy = self.check_collision(delta_x, delta_y)
+        # delta_xy = self.check_collision(delta_x, delta_y) <-- Temporary disabled
 
-        self.sprite.x = self.sprite.x + delta_xy.x
-        self.sprite.y = self.sprite.y + delta_xy.y
+        self.sprite.x = self.sprite.x + delta_x
+        self.sprite.y = self.sprite.y + delta_y
 
     ## Will be removed when implementating the A* Pathfinding script
     def check_collision(self, dx: float, dy: float) -> pyasge.Point2D():
