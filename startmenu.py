@@ -14,7 +14,8 @@ class StartMenu(GameState):
                       pyasge.Text(self.data.fonts['hud_text'], "Navigate the menu with the Q and S keys, "
                                                                "press SPACE to select.")]
         self.menu_selected = MenuID.START
-        self.set_texts_position()
+        self.set_texts_position(self.texts, self.data.screen_size, 0.4)
+        self.texts[self.menu_selected.value].colour = pyasge.COLOURS.GOLD
 
         self.data.inputs.addCallback(pyasge.EventType.E_KEY, self.input)
         self.keys = {
@@ -63,15 +64,6 @@ class StartMenu(GameState):
 
         for text in self.texts:
             self.data.renderer.render(text)
-
-    def set_texts_position(self):
-        index = 0
-        for text in self.texts:
-            text.position = [self.data.screen_size[0] * 0.5 - text.width * 0.5,
-                             self.data.screen_size[1] * 0.4 - text.height * 0.5 + 60 * index]
-            text.colour = pyasge.COLOURS.BLACK
-            index += 1
-        self.texts[self.menu_selected.value].colour = pyasge.COLOURS.GOLD
 
 
 class MenuID(Enum):

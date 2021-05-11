@@ -25,7 +25,8 @@ class LevelManager(GameState):
                        pyasge.Text(self.data.fonts['main_text'], "Level 7"),
                        pyasge.Text(self.data.fonts['hud_text'], "Navigate with the Q and S keys, "
                                                                 "press SPACE to select a level.")]
-        self.set_texts_position()
+        self.set_texts_position(self.levels, self.data.screen_size, 0.3)
+        self.levels[self.data.level_selected].colour = pyasge.COLOURS.GOLD
 
         self.data.inputs.addCallback(pyasge.EventType.E_KEY, self.input)
         self.keys = {
@@ -64,12 +65,3 @@ class LevelManager(GameState):
         self.data.renderer.setProjectionMatrix(self.data.camera.default_view)
         for text in self.levels:
             self.data.renderer.render(text)
-
-    def set_texts_position(self):
-        index = 0
-        for text in self.levels:
-            text.position = [self.data.screen_size[0] * 0.5 - text.width * 0.5,
-                             self.data.screen_size[1] * 0.3 - text.height * 0.5 + 60 * index]
-            text.colour = pyasge.COLOURS.BLACK
-            index += 1
-        self.levels[self.data.level_selected].colour = pyasge.COLOURS.GOLD
