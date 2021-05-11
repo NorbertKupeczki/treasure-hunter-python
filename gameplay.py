@@ -21,7 +21,9 @@ class GamePlay(GameState):
         # initialising HUD and the player
         self.hud = HUD(data)
         self.player = Player(data, self.data.map.starting_location)
-        self.enemy = Enemy(pyasge.Point2D(800, 800))
+
+        # initialising a single enemy for testing
+        self.enemy = Enemy(self.data, pyasge.Point2D(800, 800))
 
         # register the key handler for this class
         self.data.inputs.addCallback(pyasge.EventType.E_KEY, self.input)
@@ -32,7 +34,6 @@ class GamePlay(GameState):
         # initialise gems array & score
         self.gemsArray = [Gem(pyasge.Point2D(140, 300)), Gem(pyasge.Point2D(720, 400)), Gem(pyasge.Point2D(500, 800))]
         self.score = 0
-        print(self.gemsArray)
 
         # track key states
         self.keys = {
@@ -74,16 +75,6 @@ class GamePlay(GameState):
     def input(self, event: pyasge.KeyEvent) -> None:
         if event.action is not pyasge.KEYS.KEY_REPEATED:
             self.keys[event.key] = event.action is pyasge.KEYS.KEY_PRESSED
-
-        # if event.key is pyasge.KEYS.KEY_Q:           <-- Level manager implemented, we might don't need this - Norbert
-        #     if event.action is pyasge.KEYS.KEY_PRESSED:
-        #         print("loading map 1")
-        #         self.data.map = Map('1')
-        #
-        # if event.key is pyasge.KEYS.KEY_E:
-        #     if event.action is pyasge.KEYS.KEY_PRESSED:
-        #         print("loading map 2")
-        #         self.data.map = Map('2')
 
         # Turn game pad ON/OFF if game pad is connected
         if self.keys[pyasge.KEYS.KEY_G]:

@@ -7,7 +7,8 @@ from projetiles import Projectiles
 
 
 class Enemy:
-    def __init__(self, start_pos: pyasge.Point2D):
+    def __init__(self, data, start_pos: pyasge.Point2D):
+        self.data = data
         self.sprite = pyasge.Sprite()
         self.sprite.loadTexture("/data/images/character_zombie_idle.png")
         self.sprite.scale = 0.35

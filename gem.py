@@ -1,5 +1,4 @@
 import pyasge
-from player import Player
 
 
 class Gem:
