@@ -1,5 +1,4 @@
 import pyasge
-from typing import Tuple
 from projetiles import Projectiles
 
 
@@ -7,7 +6,6 @@ class Player:
     def __init__(self, data, start_pos: pyasge.Point2D):
         self.data = data
         self.sprite = pyasge.Sprite()
-        # self.screen_size = screen_size
         self.sprite.loadTexture("/data/images/man_spritesheet.png")
         self.set_sprite(int(402), int(50))
         self.sprite.z_order = 3

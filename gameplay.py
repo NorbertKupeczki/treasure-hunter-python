@@ -1,6 +1,7 @@
 import pyasge
 from gamestate import GameState, GameStateID
 from player import Player
+from enemy import Enemy
 from hud import HUD
 
 from map import Map
@@ -18,6 +19,7 @@ class GamePlay(GameState):
         # initialising HUD and the player
         self.hud = HUD(data)
         self.player = Player(data, self.data.map.starting_location)
+        self.enemy = Enemy(pyasge.Point2D(800, 800))
 
         # register the key handler for this class
         self.data.inputs.addCallback(pyasge.EventType.E_KEY, self.input)
@@ -95,6 +97,10 @@ class GamePlay(GameState):
 
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
         self.player.projectiles.update_projectiles(game_time)
+
+        # Moving the enemy towards the player
+        self.enemy.move_enemy(game_time, pyasge.Point2D(self.player.sprite.x, self.player.sprite.y))
+
         if self.keys[pyasge.KEYS.KEY_ESCAPE]:
             return GameStateID.EXIT
         elif self.keys[pyasge.KEYS.KEY_1]:
@@ -113,3 +119,4 @@ class GamePlay(GameState):
         self.data.map.render(self.data.renderer)  # added
         self.player.render_bullets(self.data.renderer)
         self.data.renderer.render(self.player.sprite)
+        self.data.renderer.render(self.enemy.sprite)
