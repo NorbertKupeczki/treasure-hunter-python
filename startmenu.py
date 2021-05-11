@@ -11,7 +11,7 @@ class StartMenu(GameState):
                       pyasge.Text(self.data.fonts['main_text'], "Start game"),
                       pyasge.Text(self.data.fonts['main_text'], "Level " + str(self.data.level_selected)),
                       pyasge.Text(self.data.fonts['main_text'], "Quit"),
-                      pyasge.Text(self.data.fonts['hud_text'], "Navigate the menu with the Q and S keys, "
+                      pyasge.Text(self.data.fonts['hud_text'], "Navigate the menu with the W and S keys, "
                                                                "press SPACE to select.")]
         self.menu_selected = MenuID.START
         self.set_texts_position(self.texts, self.data.screen_size, 0.4)

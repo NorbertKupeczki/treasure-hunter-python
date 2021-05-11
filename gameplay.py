@@ -7,6 +7,8 @@ from hud import HUD
 from map import Map
 from A_star_pathfinding import Pathfinding
 
+from gem import Gem
+
 
 class GamePlay(GameState):
     def __init__(self, data):
@@ -27,18 +29,25 @@ class GamePlay(GameState):
         # register the mouse handler for this class # added
         self.data.inputs.addCallback(pyasge.EventType.E_MOUSE_CLICK, self.click_event)  # added
 
+        # initialise gems array & score
+        self.gemsArray = [Gem(pyasge.Point2D(140, 300)), Gem(pyasge.Point2D(720, 400)), Gem(pyasge.Point2D(500, 800))]
+        self.score = 0
+        print(self.gemsArray)
+
         # track key states
         self.keys = {
             pyasge.KEYS.KEY_A: False,
             pyasge.KEYS.KEY_D: False,
             pyasge.KEYS.KEY_W: False,
             pyasge.KEYS.KEY_S: False,
+            pyasge.KEYS.KEY_EQUAL: False,
+            pyasge.KEYS.KEY_MINUS: False,
+            pyasge.KEYS.KEY_SPACE: False,
             pyasge.KEYS.KEY_G: False,
             pyasge.KEYS.KEY_C: False,
             pyasge.KEYS.KEY_1: False,
             pyasge.KEYS.KEY_2: False,
             pyasge.KEYS.KEY_ESCAPE: False,
-            pyasge.KEYS.KEY_SPACE: False
         }
 
     def click_event(self, event: pyasge.ClickEvent) -> None: # added
@@ -96,6 +105,15 @@ class GamePlay(GameState):
                 self.hud.coords_on = not self.hud.coords_on
 
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
+
+        # print("SCORE: " + str(self.score))
+
+        for gem in self.gemsArray:
+            if gem.check_collision(self.player.sprite):
+                self.score += gem.value
+                self.hud.update_score(self.score)
+                self.gemsArray.remove(gem)
+
         self.player.projectiles.update_projectiles(game_time)
 
         # Moving the enemy towards the player
@@ -120,3 +138,5 @@ class GamePlay(GameState):
         self.player.render_bullets(self.data.renderer)
         self.data.renderer.render(self.player.sprite)
         self.data.renderer.render(self.enemy.sprite)
+        for gem in self.gemsArray:
+            self.data.renderer.render(gem.sprite)

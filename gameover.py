@@ -10,7 +10,7 @@ class GameOver(GameState):
         self.texts = [pyasge.Text(self.data.fonts['title_text'], "Game Over!\n"),
                       pyasge.Text(self.data.fonts['main_text'], "Main Menu"),
                       pyasge.Text(self.data.fonts['main_text'], "Quit"),
-                      pyasge.Text(self.data.fonts['hud_text'], "Navigate the menu with the Q and S keys, "
+                      pyasge.Text(self.data.fonts['hud_text'], "Navigate the menu with the W and S keys, "
                                                                "press SPACE to select.")]
 
         self.set_texts_position(self.texts, self.data.screen_size, 0.4)

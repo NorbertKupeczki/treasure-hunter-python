@@ -36,3 +36,6 @@ class HUD:
             self.data.renderer.render(self.world_coordinates)
         self.data.renderer.render(self.ui_text)
         self.data.renderer.render(self.score)
+
+    def update_score(self, score: int):
+        self.score.string = "Score: "+str(score)
