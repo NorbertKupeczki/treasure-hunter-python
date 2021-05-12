@@ -18,6 +18,7 @@ class GamePlay(GameState):
 
         self.gemsArray = []
         self.enemyArray = []
+        self.vaseArray = []
         self.loadNextMap(self.data.level_selected)
         #self.data.map = Map(str(self.data.level_selected))  # added
         #self.desired_path = []  # added
@@ -45,6 +46,12 @@ class GamePlay(GameState):
 
         # register the mouse handler for this class # added
         self.data.inputs.addCallback(pyasge.EventType.E_MOUSE_CLICK, self.click_event)  # added
+
+        # initialise gems array & score
+        #self.gemsArray = [Gem(pyasge.Point2D(140, 300)), Gem(pyasge.Point2D(720, 400)), Gem(pyasge.Point2D(500, 800))]
+        self.score = 0
+        self.reload = True
+        self.timer = 1.0
 
         # track key states
         self.keys = {
@@ -74,6 +81,9 @@ class GamePlay(GameState):
                                                                    enemy.coordinate[1] * self.data.tile_size)))
 
         self.player = Player(self.data, self.data.map.starting_location)
+
+        for x in self.data.map.layers[4].tiles:
+            self.vaseArray.append((x.coordinate[0], x.coordinate[1]))
 
 
 
@@ -116,16 +126,16 @@ class GamePlay(GameState):
                     print("No game pad connected!")
 
         if self.keys[pyasge.KEYS.KEY_SPACE]:
-            if event.action is pyasge.KEYS.KEY_PRESSED:
+            if event.action is pyasge.KEYS.KEY_PRESSED and self.reload:
                 self.player.shoot()
+                self.timer = 1
+                self.reload = False
 
         if self.keys[pyasge.KEYS.KEY_C]:
             if event.action is pyasge.KEYS.KEY_PRESSED:
                 self.hud.coords_on = not self.hud.coords_on
 
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
-        # print("SCORE: " + str(self.score))
-
         for gem in self.gemsArray:
             if gem.check_collision(self.player.sprite):
                 gem_loc = pyasge.Point2D((gem.sprite.x + gem.sprite.width * 0.5) / self.data.tile_size - 0.5,
@@ -138,8 +148,15 @@ class GamePlay(GameState):
                 self.hud.update_score(self.score)
                 self.gemsArray.remove(gem)
 
+
         if not self.gemsArray and not self.exit_door.door_open:
             self.exit_door.door_open = True
+
+        if self.reload is False:
+            self.timer -= game_time.fixed_timestep
+            if self.timer < 0:
+                self.reload = True
+
 
         if not self.gemsArray and pyasge.Point2D.distance(self.player.get_sprite(),
                                                           self.exit_door.get_centre()) <= self.data.tile_size:
@@ -183,5 +200,4 @@ class GamePlay(GameState):
         for enemy in self.enemyArray:
             self.data.renderer.render(enemy.sprite)
         for gem in self.gemsArray:
-            if self.gemsArray[gem].spawnGem:
-                self.data.renderer.render(gem.sprite)
+            self.data.renderer.render(gem.sprite)
