@@ -31,8 +31,12 @@ class GamePlay(GameState):
         # register the mouse handler for this class # added
         self.data.inputs.addCallback(pyasge.EventType.E_MOUSE_CLICK, self.click_event)  # added
 
-        # initialise gems array & score
-        self.gemsArray = [Gem(pyasge.Point2D(140, 300)), Gem(pyasge.Point2D(720, 400)), Gem(pyasge.Point2D(500, 800))]
+        self.gemsArray = []
+        for x in self.data.map.layers[2].tiles:
+            self.gemsArray.append(Gem(pyasge.Point2D((x.coordinate[0] + 0.5) * self.data.tile_size,
+                                                     (x.coordinate[1] + 0.5) * self.data.tile_size)))
+        # initialise gems array & score <-- Legacy version
+        # self.gemsArray = [Gem(pyasge.Point2D(140, 300)), Gem(pyasge.Point2D(720, 400)), Gem(pyasge.Point2D(500, 800))]
         self.score = 0
 
         # track key states
@@ -101,6 +105,12 @@ class GamePlay(GameState):
 
         for gem in self.gemsArray:
             if gem.check_collision(self.player.sprite):
+                gem_loc = pyasge.Point2D((gem.sprite.x + gem.sprite.width * 0.5) / self.data.tile_size - 0.5,
+                                         (gem.sprite.y + gem.sprite.height * 0.5) / self.data.tile_size - 0.5)
+                print(f"Gem picked up from ({int(gem_loc.x)},{int(gem_loc.y)})")
+                for tile in self.data.map.layers[2].tiles:
+                    if tile.coordinate[0] == int(gem_loc.x) and tile.coordinate[1] == int(gem_loc.y):
+                        self.data.map.layers[2].tiles.remove(tile)
                 self.score += gem.value
                 self.hud.update_score(self.score)
                 self.gemsArray.remove(gem)
@@ -108,7 +118,7 @@ class GamePlay(GameState):
         self.player.projectiles.update_projectiles(game_time)
 
         # Moving the enemy towards the player
-        self.enemy.move_enemy(game_time, pyasge.Point2D(self.player.sprite.x, self.player.sprite.y))
+        # self.enemy.move_enemy(game_time, pyasge.Point2D(self.player.sprite.x, self.player.sprite.y))
 
         if self.keys[pyasge.KEYS.KEY_ESCAPE]:
             return GameStateID.EXIT

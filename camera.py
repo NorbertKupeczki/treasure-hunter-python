@@ -18,13 +18,13 @@ class Camera:
 
         if camera_x <= self.data.screen_size[0] * 0.5:
             camera_x = self.data.screen_size[0] * 0.5
-        elif camera_x >= self.data.map.width * 64 - self.data.screen_size[0] * 0.5:
-            camera_x = self.data.map.width * 64 - self.data.screen_size[0] * 0.5
+        elif camera_x >= self.data.map.width * self.data.tile_size - self.data.screen_size[0] * 0.5:
+            camera_x = self.data.map.width * self.data.tile_size - self.data.screen_size[0] * 0.5
 
         if camera_y <= self.data.screen_size[1] * 0.5:
             camera_y = self.data.screen_size[1] * 0.5
-        elif camera_y >= self.data.map.height * 64 - self.data.screen_size[1] * 0.5:
-            camera_y = self.data.map.height * 64 - self.data.screen_size[1] * 0.5
+        elif camera_y >= self.data.map.height * self.data.tile_size - self.data.screen_size[1] * 0.5:
+            camera_y = self.data.map.height * self.data.tile_size - self.data.screen_size[1] * 0.5
 
         self.camera.lookAt(pyasge.Point2D(camera_x, camera_y))
 
