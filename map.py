@@ -36,15 +36,20 @@ class Map:
                 self.layers[layer_index].passable_t = layer['walk-through']
                 self.layers[layer_index].name = layer['layer_name']
                 self.layers[layer_index].layer_cost = layer['layer_cost']
+                self.layers[layer_index].show = layer['show']
 
                 x = 0
                 y = 0
                 iteration = 0
 
                 for data in layer["data"]:
+
                     if data != 0:
                         self.layers[layer_index].tiles.append(MapTile((x, y)))
-                        self.layers[layer_index].tiles[iteration].load("data/tilesheet_complete.png", data)
+
+                        if self.layers[layer_index].show != 0:
+                            self.layers[layer_index].tiles[iteration].load("data/tilesheet_complete.png", data)
+
                         self.cost_map[y][x] += self.layers[layer_index].layer_cost
                         iteration += 1
 
@@ -53,8 +58,9 @@ class Map:
                         x = 0
                         y += 1
 
+                if self.layers[layer_index].show != 0:
+                    self.layers[layer_index].initTilePos()
 
-                self.layers[layer_index].initTilePos()
                 layer_index += 1
 
 

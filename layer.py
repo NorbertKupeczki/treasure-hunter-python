@@ -6,6 +6,7 @@ class Layer:
         self.tiles = []
         self.layer_cost = 0
         self.passable_t = 1
+        self.show = 1
 
 
     def initTilePos(self) -> None:
@@ -22,5 +23,6 @@ class Layer:
 
     def render(self, renderer: pyasge.Renderer) -> None:
 
-        for tile in self.tiles:
-            renderer.render(tile.sprite)
+        if self.show != 0:
+            for tile in self.tiles:
+                renderer.render(tile.sprite)
