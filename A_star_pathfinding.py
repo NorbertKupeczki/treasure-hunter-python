@@ -149,3 +149,7 @@ class Pathfinding:
 
 
         return False
+
+    def pop(self):
+        value = self.decided_path.pop()
+        return value

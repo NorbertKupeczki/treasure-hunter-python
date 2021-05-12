@@ -73,8 +73,13 @@ class Enemy:
         # self.sprite.x = self.sprite.x + delta_x
         # self.sprite.y = self.sprite.y + delta_y
 
+        temp_string_x = str(self.sprite.x / self.data.tile_size)
+        temp_string_x = int(temp_string_x.split(".")[0])
+        temp_string_y = str(self.sprite.y / self.data.tile_size)
+        temp_string_y = int(temp_string_y.split(".")[0])
+        touple_coord = (temp_string_x, temp_string_y)
         self.desired_path = Pathfinding(
-            (int(self.sprite.x / self.data.tile_size), int(self.sprite.y / self.data.tile_size)),
+            (touple_coord, int(self.sprite.y / self.data.tile_size)),
             (int(player_location.x / self.data.tile_size), int(player_location.y / self.data.tile_size)),
             self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
 
@@ -88,14 +93,14 @@ class Enemy:
         print(str(self.goto_y))
 
         if abs(int(self.goto_x) - int(self.sprite.x)) < 2:
-            pass
+            Pathfinding.pop(-1)
         elif self.goto_x > self.sprite.x:
             self.velocity.x = 1
         elif self.goto_x < self.sprite.x:
             self.velocity.x = -1
 
         if abs(int(self.goto_y) - int(self.sprite.y)) < 2:
-            pass
+            Pathfinding.pop(-2)
         elif self.goto_y > self.sprite.y:
             self.velocity.y = 1
         elif self.goto_y < self.sprite.y:
