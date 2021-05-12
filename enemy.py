@@ -27,7 +27,9 @@ class Enemy:
         self.sprite.x = start_pos.x
         self.sprite.y = start_pos.y
         self.desired_path = []
-        self.goto = len(self.desired_path) - 1
+        self.current_index = -1
+        self.goto_x = len(self.desired_path) + (self.current_index * 2)
+        self.goto_y = len(self.desired_path) + self.current_index
 
         self.enemy_speed = 150
         self.velocity = pyasge.Point2D()
@@ -70,19 +72,44 @@ class Enemy:
 
         # self.sprite.x = self.sprite.x + delta_x
         # self.sprite.y = self.sprite.y + delta_y
-        
-        if self.current_condition != DamageStates.DEAD:
-            self.desired_path = Pathfinding(
-                (int(self.sprite.x / self.data.tile_size), int(self.sprite.y / self.data.tile_size)),
-                (int(player_location.x / self.data.tile_size), int(player_location.y / self.data.tile_size)),
-                self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
 
-            self.goto = len(self.desired_path) - 1
-            # self.sprite = self.goto[0]
+        self.desired_path = Pathfinding(
+            (int(self.sprite.x / self.data.tile_size), int(self.sprite.y / self.data.tile_size)),
+            (int(player_location.x / self.data.tile_size), int(player_location.y / self.data.tile_size)),
+            self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
 
-            ## Checks if enemy sprite touches player sprite
-            if abs(int(player_location.x) - int(self.sprite.x)) < 2 or abs(int(player_location.y) - int(self.sprite.y)) < 2:
-                pass
+        #print(str(self.desired_path))
+        self.goto_x = len(self.desired_path) + (self.current_index * 2)
+        self.goto_y = len(self.desired_path) + self.current_index
+        self.goto_x = self.goto_x * 64
+        self.goto_y = self.goto_y * 64
+        # Debugging purposes
+        print(str(self.goto_x))
+        print(str(self.goto_y))
+
+        if abs(int(self.goto_x) - int(self.sprite.x)) < 2:
+            pass
+        elif self.goto_x > self.sprite.x:
+            self.velocity.x = 1
+        elif self.goto_x < self.sprite.x:
+            self.velocity.x = -1
+
+        if abs(int(self.goto_y) - int(self.sprite.y)) < 2:
+            pass
+        elif self.goto_y > self.sprite.y:
+            self.velocity.y = 1
+        elif self.goto_y < self.sprite.y:
+            self.velocity.y = -1
+
+        delta_x = self.enemy_speed * self.velocity.x * game_time.fixed_timestep
+        delta_y = self.enemy_speed * self.velocity.y * game_time.fixed_timestep
+
+        self.sprite.x = self.sprite.x * delta_x
+        self.sprite.y = self.sprite.y * delta_y
+
+        ## Checks if enemy sprite touches player sprite
+        if abs(int(player_location.x) - int(self.sprite.x)) < 2 or abs(int(player_location.y) - int(self.sprite.y)) < 2:
+            pass
 
     def redraw(self):
         if self.current_condition < DamageStates.DEAD:

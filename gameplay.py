@@ -30,7 +30,7 @@ class GamePlay(GameState):
         self.exit_door = Door(self.data.map.end_location)
 
         # initialising a single enemy for testing
-        # self.enemy = Enemy(self.data, pyasge.Point2D(800, 800))
+        self.enemy = Enemy(self.data, pyasge.Point2D(800, 800))
 
         # self.gemsArray = []
         # for x in self.data.map.layers[2].tiles:
@@ -152,7 +152,7 @@ class GamePlay(GameState):
         self.player.projectiles.update_projectiles(game_time)
 
         # Moving the enemy towards the player
-        #self.enemy.move_enemy(game_time, pyasge.Point2D(self.player.sprite.x, self.player.sprite.y))   #to turn back on
+        self.enemy.move_enemy(game_time, pyasge.Point2D(self.player.sprite.x, self.player.sprite.y))   #to turn back on
 
         if self.player.game_pad_enabled:
             if self.data.inputs.getGamePad(0).RIGHT_TRIGGER != -1.0:
@@ -183,5 +183,4 @@ class GamePlay(GameState):
         for enemy in self.enemyArray:
             self.data.renderer.render(enemy.sprite)
         for gem in self.gemsArray:
-            if self.gemsArray[gem].spawnGem:
-                self.data.renderer.render(gem.sprite)
+            self.data.renderer.render(gem.sprite)
