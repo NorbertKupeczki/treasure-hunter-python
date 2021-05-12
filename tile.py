@@ -9,6 +9,7 @@ class MapTile:
 
     def load(self, filename: str, text_x: int) -> None:
         self.sprite.loadTexture(filename)
+        self.sprite.setMagFilter(pyasge.MagFilter.NEAREST)
         text_x -= 1
 
         temp_string_x = str(text_x / 27)
@@ -20,7 +21,6 @@ class MapTile:
 
         self.sprite.src_rect[pyasge.Sprite.SourceRectIndex.START_Y] = temp_string_x * 64
         self.sprite.src_rect[pyasge.Sprite.SourceRectIndex.LENGTH_Y] = 64
-
 
         self.sprite.width = 64
         self.sprite.height = 64

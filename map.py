@@ -58,7 +58,7 @@ class Map:
                         iteration += 1
 
                     x += 1
-                    if (x == self.width):
+                    if x == self.width:
                         x = 0
                         y += 1
 
@@ -67,8 +67,7 @@ class Map:
 
                 layer_index += 1
 
-
     def render(self, renderer: pyasge.Renderer) -> None:
 
-        for x in range(len(self.layers)):# for every layer send the render to them
+        for x in range(len(self.layers)):  # for every layer send the render to them
             self.layers[x].render(renderer)
