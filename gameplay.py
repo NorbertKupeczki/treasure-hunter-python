@@ -21,6 +21,8 @@ class GamePlay(GameState):
         self.enemyArray = []
         self.vaseArray = []
         self.loadNextMap(self.data.level_selected)
+
+        self.desired_path = []
         #self.data.map = Map(str(self.data.level_selected))  # added
         #self.desired_path = []  # added
 
@@ -104,9 +106,9 @@ class GamePlay(GameState):
                 #         if self.data.map.cost_map[temp_string_y][temp_string_x] < 10000:    # if the cost of the thing clicked on is higher than this amount that means
                 #                                                                         # the player clicked on a wall or something so don't initiate the pathfinding
                 #             self.desired_path = Pathfinding((0, 0), touple_coord, self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path   # call the class to give the coordinates and save everything in the array
-                #
-                for i in range(len(self.enemyArray)):    # debugging purpose, prints out the values of the above array
-                    print(self.enemyArray[i])
+
+                for i in range(len(self.desired_path)):    # debugging purpose, prints out the values of the above array
+                    print(self.desired_path[i])
 
         # Testing different functions on pressing RMB - Norbert
         # elif event.button is pyasge.MOUSE.MOUSE_BTN2:
@@ -171,8 +173,7 @@ class GamePlay(GameState):
                 self.reload = True
 
 
-        if not self.gemsArray and pyasge.Point2D.distance(self.player.get_sprite(),
-                                                          self.exit_door.get_centre()) <= self.data.tile_size:
+        if not self.gemsArray and pyasge.Point2D.distance(self.player.get_sprite(), self.exit_door.get_centre()) <= self.data.tile_size:
             if self.data.level_selected == 7:
                 return GameStateID.WINNER_WINNER
             else:
@@ -180,6 +181,9 @@ class GamePlay(GameState):
                 return GameStateID.NEXT_LEVEL
 
         self.player.projectiles.update_projectiles(game_time)
+
+        self.enemyR.projectiles.update_projectiles(game_time)
+
 
         # Moving the enemy towards the player
         #self.enemy.move_enemy(game_time, pyasge.Point2D(self.player.sprite.x, self.player.sprite.y))   #to turn back on
@@ -211,6 +215,7 @@ class GamePlay(GameState):
         self.data.renderer.render(self.entrance_door.sprite)
         self.data.renderer.render(self.exit_door.sprite)
         self.player.render_bullets(self.data.renderer)
+        self.enemyR.render_bullets(self.data.renderer)
         self.data.renderer.render(self.player.sprite)
         for enemy in self.enemyArray:
             self.data.renderer.render(enemy.sprite)
