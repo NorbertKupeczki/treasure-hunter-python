@@ -15,8 +15,11 @@ class GamePlay(GameState):
         super().__init__(data)
         self.id = GameStateID.GAMEPLAY
 
-        self.data.map = Map(str(self.data.level_selected))  # added
-        self.desired_path = []  # added
+        self.gemsArray = []
+        self.enemyArray = []
+        self.loadNextMap(self.data.level_selected)
+        #self.data.map = Map(str(self.data.level_selected))  # added
+        #self.desired_path = []  # added
 
         # initialising HUD and the player
         self.hud = HUD(data)
@@ -55,23 +58,42 @@ class GamePlay(GameState):
             pyasge.KEYS.KEY_ESCAPE: False,
         }
 
+    def loadNextMap(self, level_num) -> None:    #create the wanted level
+        self.data.map = Map(str(level_num))
+
+        for x in self.data.map.layers[2].tiles:
+            self.gemsArray.append(Gem(pyasge.Point2D((x.coordinate[0] + 0.5) * self.data.tile_size,
+                                                     (x.coordinate[1] + 0.5) * self.data.tile_size)))
+
+        for x in self.data.map.layers[3].tiles:
+            self.enemyArray.append((x.coordinate[0], x.coordinate[1]))
+
+
+        self.player = Player(self.data, self.data.map.starting_location)
+
+
+
+
     def click_event(self, event: pyasge.ClickEvent) -> None: # added
         if event.button is pyasge.MOUSE.MOUSE_BTN1:
             if event.action is pyasge.MOUSE.BUTTON_PRESSED:   # if the left click is detected
-                temp_string_x = str(event.x / self.data.tile_size)   # the click position in pyASGE is relative to the world map instead of the size of the screen, if we divide it by 8 we get the tile number
-                temp_string_x = int(temp_string_x.split(".")[0])   # it will most likely be a long float value, therefore by saving it as a string we are able to get the numbers before the "."
-                temp_string_y = str(event.y / self.data.tile_size)
-                temp_string_y = int(temp_string_y.split(".")[0])
-                touple_coord = (temp_string_x, temp_string_y)       # save it as a touple to be sent off
+                # temp_string_x = str(event.x / self.data.tile_size)   # the click position in pyASGE is relative to the world map instead of the size of the screen, if we divide it by 8 we get the tile number
+                # temp_string_x = int(temp_string_x.split(".")[0])   # it will most likely be a long float value, therefore by saving it as a string we are able to get the numbers before the "."
+                # temp_string_y = str(event.y / self.data.tile_size)
+                # temp_string_y = int(temp_string_y.split(".")[0])
+                # touple_coord = (temp_string_x, temp_string_y)       # save it as a touple to be sent off
+                #
+                # if 0 <= temp_string_x < self.data.map.width:  # check if the coordinates were in the actually map and not outside of the map
+                #     if 0 <= temp_string_y < self.data.map.height:
+                #         if self.data.map.cost_map[temp_string_y][temp_string_x] < 10000:    # if the cost of the thing clicked on is higher than this amount that means
+                #                                                                         # the player clicked on a wall or something so don't initiate the pathfinding
+                #             self.desired_path = Pathfinding((0, 0), touple_coord, self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path   # call the class to give the coordinates and save everything in the array
+                #
+                for i in range(len(self.enemyArray)):    # debugging purpose, prints out the values of the above array
+                    print(self.enemyArray[i])
 
-                if 0 <= temp_string_x < self.data.map.width:  # check if the coordinates were in the actually map and not outside of the map
-                    if 0 <= temp_string_y < self.data.map.height:
-                        if self.data.map.cost_map[temp_string_y][temp_string_x] < 10000:    # if the cost of the thing clicked on is higher than this amount that means
-                                                                                        # the player clicked on a wall or something so don't initiate the pathfinding
-                            self.desired_path = Pathfinding((0, 0), touple_coord, self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path   # call the class to give the coordinates and save everything in the array
 
-                            for i in range(len(self.desired_path)):    # debugging purpose, prints out the values of the above array
-                                print(self.desired_path[i].tile)
+
         # Testing different functions on pressing RMB - Norbert
         # elif event.button is pyasge.MOUSE.MOUSE_BTN2:
         #
@@ -100,7 +122,6 @@ class GamePlay(GameState):
                 self.hud.coords_on = not self.hud.coords_on
 
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
-
         # print("SCORE: " + str(self.score))
 
         for gem in self.gemsArray:
@@ -115,10 +136,20 @@ class GamePlay(GameState):
                 self.hud.update_score(self.score)
                 self.gemsArray.remove(gem)
 
+
+
+        if len(self.gemsArray) == 0:
+            if self.data.level_selected == 7:
+                return GameStateID.WINNER_WINNER
+            else:
+                self.loadNextMap(self.data.level_selected + 1)    # when the player collects all of the gems pass onto the next level
+
+
+
         self.player.projectiles.update_projectiles(game_time)
 
         # Moving the enemy towards the player
-        # self.enemy.move_enemy(game_time, pyasge.Point2D(self.player.sprite.x, self.player.sprite.y))
+        #self.enemy.move_enemy(game_time, pyasge.Point2D(self.player.sprite.x, self.player.sprite.y))   #to turn back on
 
         if self.keys[pyasge.KEYS.KEY_ESCAPE]:
             return GameStateID.EXIT
