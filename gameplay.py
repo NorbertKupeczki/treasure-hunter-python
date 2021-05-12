@@ -1,11 +1,13 @@
 import pyasge
 from gamestate import GameState, GameStateID
 from player import Player
+from enemy import Enemy
 from hud import HUD
 
 from map import Map
 from A_star_pathfinding import Pathfinding
 
+from gem import Gem
 
 
 class GamePlay(GameState):
@@ -13,18 +15,29 @@ class GamePlay(GameState):
         super().__init__(data)
         self.id = GameStateID.GAMEPLAY
 
-        self.data.map = Map('2')  # added
+        self.data.map = Map(str(self.data.level_selected))  # added
         self.desired_path = []  # added
 
         # initialising HUD and the player
         self.hud = HUD(data)
-        self.player = Player(data, pyasge.Point2D(128, 128))
+        self.player = Player(data, self.data.map.starting_location)
+
+        # initialising a single enemy for testing
+        self.enemy = Enemy(self.data, pyasge.Point2D(800, 800))
 
         # register the key handler for this class
         self.data.inputs.addCallback(pyasge.EventType.E_KEY, self.input)
 
         # register the mouse handler for this class # added
         self.data.inputs.addCallback(pyasge.EventType.E_MOUSE_CLICK, self.click_event)  # added
+
+        self.gemsArray = []
+        for x in self.data.map.layers[2].tiles:
+            self.gemsArray.append(Gem(pyasge.Point2D((x.coordinate[0] + 0.5) * self.data.tile_size,
+                                                     (x.coordinate[1] + 0.5) * self.data.tile_size)))
+        # initialise gems array & score <-- Legacy version
+        # self.gemsArray = [Gem(pyasge.Point2D(140, 300)), Gem(pyasge.Point2D(720, 400)), Gem(pyasge.Point2D(500, 800))]
+        self.score = 0
 
         # track key states
         self.keys = {
@@ -67,16 +80,6 @@ class GamePlay(GameState):
         if event.action is not pyasge.KEYS.KEY_REPEATED:
             self.keys[event.key] = event.action is pyasge.KEYS.KEY_PRESSED
 
-        if event.key is pyasge.KEYS.KEY_Q:
-            if event.action is pyasge.KEYS.KEY_PRESSED:
-                print("loading map 1")
-                self.data.map = Map('1')
-
-        if event.key is pyasge.KEYS.KEY_E:
-            if event.action is pyasge.KEYS.KEY_PRESSED:
-                print("loading map 2")
-                self.data.map = Map('2')
-
         # Turn game pad ON/OFF if game pad is connected
         if self.keys[pyasge.KEYS.KEY_G]:
             if event.action is pyasge.KEYS.KEY_PRESSED:
@@ -97,7 +100,26 @@ class GamePlay(GameState):
                 self.hud.coords_on = not self.hud.coords_on
 
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
+
+        # print("SCORE: " + str(self.score))
+
+        for gem in self.gemsArray:
+            if gem.check_collision(self.player.sprite):
+                gem_loc = pyasge.Point2D((gem.sprite.x + gem.sprite.width * 0.5) / self.data.tile_size - 0.5,
+                                         (gem.sprite.y + gem.sprite.height * 0.5) / self.data.tile_size - 0.5)
+                print(f"Gem picked up from ({int(gem_loc.x)},{int(gem_loc.y)})")
+                for tile in self.data.map.layers[2].tiles:
+                    if tile.coordinate[0] == int(gem_loc.x) and tile.coordinate[1] == int(gem_loc.y):
+                        self.data.map.layers[2].tiles.remove(tile)
+                self.score += gem.value
+                self.hud.update_score(self.score)
+                self.gemsArray.remove(gem)
+
         self.player.projectiles.update_projectiles(game_time)
+
+        # Moving the enemy towards the player
+        # self.enemy.move_enemy(game_time, pyasge.Point2D(self.player.sprite.x, self.player.sprite.y))
+
         if self.keys[pyasge.KEYS.KEY_ESCAPE]:
             return GameStateID.EXIT
         elif self.keys[pyasge.KEYS.KEY_1]:
@@ -116,3 +138,6 @@ class GamePlay(GameState):
         self.data.map.render(self.data.renderer)  # added
         self.player.render_bullets(self.data.renderer)
         self.data.renderer.render(self.player.sprite)
+        self.data.renderer.render(self.enemy.sprite)
+        for gem in self.gemsArray:
+            self.data.renderer.render(gem.sprite)

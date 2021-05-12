@@ -5,6 +5,7 @@ from gameplay import GamePlay
 from startmenu import StartMenu
 from gameover import GameOver
 from winnerwinner import WinnerWinner
+from levelmanager import LevelManager
 from gamestate import GameStateID
 from camera import Camera
 
@@ -20,10 +21,11 @@ class MyASGEGame(pyasge.ASGEGame):
         self.data = GameData()
         self.data.inputs = self.inputs
         self.data.renderer = self.renderer
-        self.data.fonts['kenvector'] = self.renderer.loadFont("/data/fonts/kenvector_future.ttf", 40)
-        self.data.fonts['hud_text'] = self.renderer.loadFont("/data/fonts/kenvector_future.ttf", 18)
+        self.data.fonts['title_text'] = self.renderer.loadFont("/data/fonts/oblivion-font.ttf", 60)
+        self.data.fonts['main_text'] = self.renderer.loadFont("/data/fonts/oblivion-font.ttf", 40)
+        self.data.fonts['hud_text'] = self.renderer.loadFont("/data/fonts/oblivion-font.ttf", 18)
         self.data.screen_size = settings.window_width, settings.window_height
-        self.data.camera = Camera()
+        self.data.camera = Camera(self.data)
         self.active_state = StartMenu(self.data)
 
     def update(self, game_time: pyasge.GameTime) -> None:
@@ -51,6 +53,8 @@ class MyASGEGame(pyasge.ASGEGame):
                 self.active_state = GameOver(self.data)
             elif new_state is GameStateID.WINNER_WINNER:
                 self.active_state = WinnerWinner(self.data)
+            elif new_state is GameStateID.LEVEL_MANAGER:
+                self.active_state = LevelManager(self.data)
             else:
                 print("Unexpected error")
                 self.signalExit()

@@ -19,6 +19,7 @@ class GameStateID(Enum):
     GAME_OVER = 3
     WINNER_WINNER = 4
     EXIT = 5
+    LEVEL_MANAGER = 6
 
 
 class GameState(ABC):
@@ -42,3 +43,11 @@ class GameState(ABC):
     @abstractmethod
     def render(self, game_time: pyasge.GameTime) -> None:
         pass
+
+    def set_texts_position(self, text_array, screen_size, y_offset):
+        index = 0
+        for text in text_array:
+            text.position = [screen_size[0] * 0.5 - text.width * 0.5,
+                             screen_size[1] * y_offset - text.height * 0.5 + 60 * index]
+            text.colour = pyasge.COLOURS.BLACK
+            index += 1

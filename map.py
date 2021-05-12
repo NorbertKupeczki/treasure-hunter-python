@@ -3,14 +3,15 @@ from layer import Layer
 from tile import MapTile
 import json
 
+
 class Map:
     def __init__(self, level):
         self.layers = []
         self.width = 0
         self.height = 0
-        self.cost_map =[]
+        self.cost_map = []
+        self.starting_location = pyasge.Point2D()
         self.loadMap(level)
-
 
     def loadMap(self, level) -> None:  # takes the level we want to load in
 
@@ -27,6 +28,10 @@ class Map:
             self.height = int(size_string.split()[1])
             self.cost_map = [[0 for i in range(self.width)] for j in range(self.height)]  # creates a 2d map for the costs
 
+            start_string = Data['start_pos']
+            self.starting_location = pyasge.Point2D(int(start_string.split()[0]) * 64,
+                                                    int(start_string.split()[1]) * 64)
+
             for layer in Data['Layers']: # for every layer array in the Json file
                 self.layers[layer_index].passable_t = layer['walk-through']
                 self.layers[layer_index].name = layer['layer_name']
@@ -39,7 +44,7 @@ class Map:
                 for data in layer["data"]:
                     if data != 0:
                         self.layers[layer_index].tiles.append(MapTile((x, y)))
-                        self.layers[layer_index].tiles[iteration].load("data/TileSet data/Tilemap/colored_tilemap_packed.png", data)
+                        self.layers[layer_index].tiles[iteration].load("data/tilesheet_complete.png", data)
                         self.cost_map[y][x] += self.layers[layer_index].layer_cost
                         iteration += 1
 

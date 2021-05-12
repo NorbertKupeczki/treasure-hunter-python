@@ -1,5 +1,4 @@
 import pyasge
-from typing import Tuple
 from projetiles import Projectiles
 
 
@@ -7,33 +6,29 @@ class Player:
     def __init__(self, data, start_pos: pyasge.Point2D):
         self.data = data
         self.sprite = pyasge.Sprite()
-        # self.screen_size = screen_size
         self.sprite.loadTexture("/data/images/man_spritesheet.png")
         self.set_sprite(int(402), int(50))
+        self.sprite.z_order = 3
         self.sprite.x = start_pos.x
         self.sprite.y = start_pos.y
         self.player_speed = 300
         self.velocity = pyasge.Point2D()
         self.game_pad_enabled = False
         self.facing = pyasge.Point2D(0, 1)
-        self.projectiles = Projectiles()
+        self.projectiles = Projectiles(data)
 
     def move_player(self, game_time: pyasge.GameTime, keys, game_pad):
         if keys[pyasge.KEYS.KEY_W]:
             self.velocity.y = -1
-            self.facing = pyasge.Point2D(0, -1)
         elif keys[pyasge.KEYS.KEY_S]:
             self.velocity.y = 1
-            self.facing = pyasge.Point2D(0, 1)
         else:
             self.velocity.y = 0
 
         if keys[pyasge.KEYS.KEY_A]:
             self.velocity.x = -1
-            self.facing = pyasge.Point2D(-1, 0)
         elif keys[pyasge.KEYS.KEY_D]:
             self.velocity.x = 1
-            self.facing = pyasge.Point2D(1, 0)
         else:
             self.velocity.x = 0
 
@@ -43,13 +38,17 @@ class Player:
 
         if self.velocity.y < 0:
             self.set_sprite(47, 46)
+            self.facing = pyasge.Point2D(0, -1)
         elif self.velocity.y > 0:
             self.set_sprite(402, 50)
+            self.facing = pyasge.Point2D(0, 1)
 
         if self.velocity.x < 0:
             self.set_sprite(268, 46)
+            self.facing = pyasge.Point2D(-1, 0)
         elif self.velocity.x > 0:
             self.set_sprite(226, 46)
+            self.facing = pyasge.Point2D(1, 0)
 
         delta_x = self.player_speed * self.velocity.x * game_time.fixed_timestep
         delta_y = self.player_speed * self.velocity.y * game_time.fixed_timestep
