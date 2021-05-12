@@ -10,7 +10,7 @@ from projetiles import Projectiles
 class Enemy:
     def __init__(self, data, start_pos: pyasge.Point2D) -> None:
 
-        ## Filenames for each damage state zombie enemy can have
+        # Filenames for each damage state zombie enemy can have
         self.states = ["/data/images/character_zombie_healthy.png",
                        "/data/images/character_zombie_damaged.png",
                        "/data/images/character_zombie_verydamaged.png",
@@ -19,7 +19,6 @@ class Enemy:
 
         self.sprite = pyasge.Sprite()
         self.sprite.loadTexture(self.states[0])
-        self.sprite.scale = 0.35
 
         self.data = data
 
