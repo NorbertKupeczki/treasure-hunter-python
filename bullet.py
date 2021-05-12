@@ -3,17 +3,18 @@ import pyasge
 
 class Bullet:
     def __init__(self, spawn: pyasge.Point2D, direction: pyasge.Point2D):
-        self.speed = 500
+        self.speed = 600
         self.velocity = pyasge.Point2D(direction)
         self.sprite = pyasge.Sprite()
         self.sprite.loadTexture("/data/images/bullet2.png")
+        self.sprite.z_order = 3
         self.set_facing(direction)
         self.sprite.x = spawn.x - self.sprite.width * 0.5
         self.sprite.y = spawn.y - self.sprite.height * 0.5
-        self.traveled_distance = 0.0
 
     def centre(self) -> pyasge.Point2D:
-        sprite_centre = pyasge.Point2D(self.sprite.x + self.sprite.width * 0.5, self.sprite.y + self.sprite.height * 0.5)
+        sprite_centre = pyasge.Point2D(self.sprite.x + self.sprite.width * 0.5,
+                                       self.sprite.y + self.sprite.height * 0.5)
         return sprite_centre
 
     def set_facing(self, direction: pyasge.Point2D):

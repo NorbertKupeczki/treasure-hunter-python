@@ -2,6 +2,7 @@ import pyasge
 from gamestate import GameState, GameStateID
 from player import Player
 from enemy import Enemy
+from door import Door
 from hud import HUD
 
 from map import Map
@@ -25,22 +26,25 @@ class GamePlay(GameState):
         self.hud = HUD(data)
         self.player = Player(data, self.data.map.starting_location)
 
+        self.entrance_door = Door(self.data.map.starting_location)
+        self.exit_door = Door(self.data.map.end_location)
+
         # initialising a single enemy for testing
-        self.enemy = Enemy(self.data, pyasge.Point2D(800, 800))
+        # self.enemy = Enemy(self.data, pyasge.Point2D(800, 800))
+
+        # self.gemsArray = []
+        # for x in self.data.map.layers[2].tiles:
+        #     self.gemsArray.append(Gem(pyasge.Point2D((x.coordinate[0] + 0.5) * self.data.tile_size,
+        #                                              (x.coordinate[1] + 0.5) * self.data.tile_size)))
+        # initialise gems array & score <-- Legacy version
+        # self.gemsArray = [Gem(pyasge.Point2D(140, 300)), Gem(pyasge.Point2D(720, 400)), Gem(pyasge.Point2D(500, 800))]
+        self.score = 0
 
         # register the key handler for this class
         self.data.inputs.addCallback(pyasge.EventType.E_KEY, self.input)
 
         # register the mouse handler for this class # added
         self.data.inputs.addCallback(pyasge.EventType.E_MOUSE_CLICK, self.click_event)  # added
-
-        self.gemsArray = []
-        for x in self.data.map.layers[2].tiles:
-            self.gemsArray.append(Gem(pyasge.Point2D((x.coordinate[0] + 0.5) * self.data.tile_size,
-                                                     (x.coordinate[1] + 0.5) * self.data.tile_size)))
-        # initialise gems array & score <-- Legacy version
-        # self.gemsArray = [Gem(pyasge.Point2D(140, 300)), Gem(pyasge.Point2D(720, 400)), Gem(pyasge.Point2D(500, 800))]
-        self.score = 0
 
         # track key states
         self.keys = {
@@ -61,13 +65,13 @@ class GamePlay(GameState):
     def loadNextMap(self, level_num) -> None:    #create the wanted level
         self.data.map = Map(str(level_num))
 
-        for x in self.data.map.layers[2].tiles:
-            self.gemsArray.append(Gem(pyasge.Point2D((x.coordinate[0] + 0.5) * self.data.tile_size,
-                                                     (x.coordinate[1] + 0.5) * self.data.tile_size)))
+        for gem in self.data.map.layers[2].tiles:
+            self.gemsArray.append(Gem(pyasge.Point2D((gem.coordinate[0] + 0.5) * self.data.tile_size,
+                                                     (gem.coordinate[1] + 0.5) * self.data.tile_size)))
 
-        for x in self.data.map.layers[3].tiles:
-            self.enemyArray.append((x.coordinate[0], x.coordinate[1]))
-
+        for enemy in self.data.map.layers[3].tiles:
+            self.enemyArray.append(Enemy(self.data, pyasge.Point2D(enemy.coordinate[0] * self.data.tile_size,
+                                                                   enemy.coordinate[1] * self.data.tile_size)))
 
         self.player = Player(self.data, self.data.map.starting_location)
 
@@ -91,8 +95,6 @@ class GamePlay(GameState):
                 #
                 for i in range(len(self.enemyArray)):    # debugging purpose, prints out the values of the above array
                     print(self.enemyArray[i])
-
-
 
         # Testing different functions on pressing RMB - Norbert
         # elif event.button is pyasge.MOUSE.MOUSE_BTN2:
@@ -136,20 +138,27 @@ class GamePlay(GameState):
                 self.hud.update_score(self.score)
                 self.gemsArray.remove(gem)
 
+        if not self.gemsArray and not self.exit_door.door_open:
+            self.exit_door.door_open = True
 
-
-        if len(self.gemsArray) == 0:
+        if not self.gemsArray and pyasge.Point2D.distance(self.player.get_sprite(),
+                                                          self.exit_door.get_centre()) <= self.data.tile_size:
             if self.data.level_selected == 7:
                 return GameStateID.WINNER_WINNER
             else:
-                self.loadNextMap(self.data.level_selected + 1)    # when the player collects all of the gems pass onto the next level
-
-
+                # self.loadNextMap(self.data.level_selected + 1)    # when the player collects all of the gems pass onto the next level
+                print("Exit level")
 
         self.player.projectiles.update_projectiles(game_time)
 
         # Moving the enemy towards the player
         #self.enemy.move_enemy(game_time, pyasge.Point2D(self.player.sprite.x, self.player.sprite.y))   #to turn back on
+
+        if self.player.game_pad_enabled:
+            if self.data.inputs.getGamePad(0).RIGHT_TRIGGER != -1.0:
+                self.player.shoot()
+
+        self.exit_door.update(game_time)
 
         if self.keys[pyasge.KEYS.KEY_ESCAPE]:
             return GameStateID.EXIT
@@ -164,11 +173,14 @@ class GamePlay(GameState):
     def render(self, game_time: pyasge.GameTime) -> None:
         corner = self.data.camera.look_at(self.player.get_sprite())
         self.data.renderer.setProjectionMatrix(self.data.camera.camera.view)
-        self.hud.render_hud(corner)
 
+        self.hud.render_hud(corner)
         self.data.map.render(self.data.renderer)  # added
+        self.data.renderer.render(self.entrance_door.sprite)
+        self.data.renderer.render(self.exit_door.sprite)
         self.player.render_bullets(self.data.renderer)
         self.data.renderer.render(self.player.sprite)
-        self.data.renderer.render(self.enemy.sprite)
+        for enemy in self.enemyArray:
+            self.data.renderer.render(enemy.sprite)
         for gem in self.gemsArray:
             self.data.renderer.render(gem.sprite)

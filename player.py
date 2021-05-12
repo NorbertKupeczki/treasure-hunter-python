@@ -8,12 +8,13 @@ class Player:
         self.sprite = pyasge.Sprite()
         self.sprite.loadTexture("/data/images/man_spritesheet.png")
         self.set_sprite(int(402), int(50))
-        self.sprite.z_order = 3
+        self.sprite.z_order = 5
         self.sprite.x = start_pos.x
         self.sprite.y = start_pos.y
         self.player_speed = 300
         self.velocity = pyasge.Point2D()
         self.game_pad_enabled = False
+        self.game_pad_sensitivity = 0.2
         self.facing = pyasge.Point2D(0, 1)
         self.projectiles = Projectiles(data)
 
@@ -33,8 +34,10 @@ class Player:
             self.velocity.x = 0
 
         if game_pad.connected and self.game_pad_enabled:
-            self.velocity.x = game_pad.x
-            self.velocity.y = game_pad.y
+            if abs(game_pad.x) > self.game_pad_sensitivity:
+                self.velocity.x = game_pad.x
+            if abs(game_pad.y) > self.game_pad_sensitivity:
+                self.velocity.y = game_pad.y
 
         if self.velocity.y < 0:
             self.set_sprite(47, 46)

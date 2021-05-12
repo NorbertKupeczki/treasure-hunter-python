@@ -11,6 +11,7 @@ class Map:
         self.height = 0
         self.cost_map = []
         self.starting_location = pyasge.Point2D()
+        self.end_location = pyasge.Point2D()
         self.loadMap(level)
 
     def loadMap(self, level) -> None:  # takes the level we want to load in
@@ -31,6 +32,9 @@ class Map:
             start_string = Data['start_pos']
             self.starting_location = pyasge.Point2D(int(start_string.split()[0]) * 64,
                                                     int(start_string.split()[1]) * 64)
+            end_string = Data['end_pos']
+            self.end_location = pyasge.Point2D((int(end_string.split()[0]) + 0.5) * 64,
+                                               (int(end_string.split()[1]) + 0.5) * 64)
 
             for layer in Data['Layers']: # for every layer array in the Json file
                 self.layers[layer_index].passable_t = layer['walk-through']
