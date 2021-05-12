@@ -33,6 +33,8 @@ class Player:
         if self.reload_time < 1.0:
             self.reload_time += game_time.fixed_timestep
 
+        self.projectiles.update_projectiles(game_time)
+
     def move_player(self, game_time: pyasge.GameTime, keys, game_pad):
         if keys[pyasge.KEYS.KEY_W]:
             self.velocity.y = -1
@@ -88,9 +90,11 @@ class Player:
         self.sprite.height = self.SPRITE_SIZE.y
 
     def get_sprite(self) -> pyasge.Point2D:
-        sprite_centre = pyasge.Point2D(self.sprite.x + self.sprite.width * 0.5, self.sprite.y + self.sprite.height * 0.5)
+        sprite_centre = pyasge.Point2D(self.sprite.x + self.sprite.width * 0.5,
+                                       self.sprite.y + self.sprite.height * 0.5)
         self.data.world_loc = sprite_centre
-        self.data.tile_loc = pyasge.Point2D(int(sprite_centre.x / self.data.tile_size), int(sprite_centre.y / self.data.tile_size))
+        self.data.tile_loc = pyasge.Point2D(int(sprite_centre.x / self.data.tile_size),
+                                            int(sprite_centre.y / self.data.tile_size))
         return sprite_centre
 
     def check_collision(self, dx: float, dy: float) -> pyasge.Point2D():
@@ -112,14 +116,15 @@ class Player:
         return self.game_pad_enabled
 
     def shoot(self):
-        spawn_point = pyasge.Point2D(self.sprite.x + self.sprite.width * 0.5, self.sprite.y + self.sprite.height * 0.5)
+        spawn_point = pyasge.Point2D(self.sprite.x + self.sprite.width * 0.5,
+                                     self.sprite.y + self.sprite.height * 0.5)
         if self.reload_time >= 1.0:
             self.projectiles.shoot(spawn_point, self.facing)
             self.reload_time = 0.0
 
-    def render_bullets(self, renderer):
+    def render_bullets(self):
         for bullets in self.projectiles.projectiles:
-            renderer.render(bullets.sprite)
+            self.data.renderer.render(bullets.sprite)
 
     def is_passable(self, world_location: pyasge.Point2D()) -> bool:
         tile_loc = pyasge.Point2D(int(world_location.x / self.data.tile_size),
