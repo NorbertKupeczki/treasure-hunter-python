@@ -85,6 +85,12 @@ class EnemyR:
 
             self.desired_path = Pathfinding(touple_coord, (int(player_location_tile.x), int(player_location_tile.y)), self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path  # call the class to give the coordinates and save everything in the array
 
+
+
+
+
+
+
             for i in range(len(self.desired_path)):  # debugging purpose, prints out the values of the above array
                 print(self.desired_path[i].tile)
             print("this")
