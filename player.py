@@ -10,6 +10,8 @@ class Player:
         self.sprite.loadTexture("/data/images/player_sh.png")
         self.SPRITE_SIZE = pyasge.Point2D(int(self.sprite.getTexture().width * 0.334),
                                           int(self.sprite.getTexture().height * 0.25))
+
+        print(self.SPRITE_SIZE)
         self.sprite_sheet = {
             'walk_up': 0,
             'walk_right': 62,

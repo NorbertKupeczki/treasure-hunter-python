@@ -2,6 +2,7 @@ import pyasge
 from gamestate import GameState, GameStateID
 from player import Player
 from enemy import Enemy
+from rangedEnemy import EnemyR
 from door import Door
 from hud import HUD
 
@@ -32,6 +33,7 @@ class GamePlay(GameState):
 
         # initialising a single enemy for testing
         # self.enemy = Enemy(self.data, pyasge.Point2D(800, 800))
+        self.enemyR = EnemyR(self.data, pyasge.Point2D(500, 500))
 
         # self.gemsArray = []
         # for x in self.data.map.layers[2].tiles:
@@ -136,6 +138,17 @@ class GamePlay(GameState):
                 self.hud.coords_on = not self.hud.coords_on
 
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
+
+        self.enemyR.move_enemy(game_time, pyasge.Point2D(self.player.sprite.x, self.player.sprite.y), self.data.tile_loc)
+
+
+
+
+
+
+
+
+
         for gem in self.gemsArray:
             if gem.check_collision(self.player.sprite):
                 gem_loc = pyasge.Point2D((gem.sprite.x + gem.sprite.width * 0.5) / self.data.tile_size - 0.5,
@@ -190,6 +203,8 @@ class GamePlay(GameState):
     def render(self, game_time: pyasge.GameTime) -> None:
         corner = self.data.camera.look_at(self.player.get_sprite())
         self.data.renderer.setProjectionMatrix(self.data.camera.camera.view)
+
+        self.data.renderer.render(self.enemyR.sprite)
 
         self.hud.render_hud(corner)
         self.data.map.render(self.data.renderer)  # added
