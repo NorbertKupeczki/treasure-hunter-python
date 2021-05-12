@@ -20,6 +20,7 @@ class GameStateID(Enum):
     WINNER_WINNER = 4
     EXIT = 5
     LEVEL_MANAGER = 6
+    NEXT_LEVEL = 7
 
 
 class GameState(ABC):

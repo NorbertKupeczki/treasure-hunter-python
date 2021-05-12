@@ -1,4 +1,5 @@
 import pyasge
+import math
 from projetiles import Projectiles
 
 
@@ -6,8 +7,16 @@ class Player:
     def __init__(self, data, start_pos: pyasge.Point2D):
         self.data = data
         self.sprite = pyasge.Sprite()
-        self.sprite.loadTexture("/data/images/man_spritesheet.png")
-        self.set_sprite(int(402), int(50))
+        self.sprite.loadTexture("/data/images/player_sh.png")
+        self.SPRITE_SIZE = pyasge.Point2D(int(self.sprite.getTexture().width * 0.334),
+                                          int(self.sprite.getTexture().height * 0.25))
+        self.sprite_sheet = {
+            'walk_up': 0,
+            'walk_right': 62,
+            'walk_left': 124,
+            'walk_down': 186
+        }
+        self.set_sprite(int(46), int(self.sprite_sheet['walk_down']))
         self.sprite.z_order = 5
         self.sprite.x = start_pos.x
         self.sprite.y = start_pos.y
@@ -17,6 +26,7 @@ class Player:
         self.game_pad_sensitivity = 0.2
         self.facing = pyasge.Point2D(0, 1)
         self.projectiles = Projectiles(data)
+        self.elapsed_time = 0.0
 
     def move_player(self, game_time: pyasge.GameTime, keys, game_pad):
         if keys[pyasge.KEYS.KEY_W]:
@@ -39,19 +49,22 @@ class Player:
             if abs(game_pad.y) > self.game_pad_sensitivity:
                 self.velocity.y = game_pad.y
 
-        if self.velocity.y < 0:
-            self.set_sprite(47, 46)
-            self.facing = pyasge.Point2D(0, -1)
-        elif self.velocity.y > 0:
-            self.set_sprite(402, 50)
-            self.facing = pyasge.Point2D(0, 1)
+        if self.velocity.x != 0 or self.velocity.y != 0:
+            animation_speed = math.sqrt(pow(self.velocity.x, 2) + pow(self.velocity.y, 2))
+            animation_index = self.animation_controller(game_time, animation_speed)
+            if self.velocity.y < 0:
+                self.set_sprite(animation_index, int(self.sprite_sheet['walk_up']))
+                self.facing = pyasge.Point2D(0, -1)
+            elif self.velocity.y > 0:
+                self.set_sprite(animation_index, int(self.sprite_sheet['walk_down']))
+                self.facing = pyasge.Point2D(0, 1)
 
-        if self.velocity.x < 0:
-            self.set_sprite(268, 46)
-            self.facing = pyasge.Point2D(-1, 0)
-        elif self.velocity.x > 0:
-            self.set_sprite(226, 46)
-            self.facing = pyasge.Point2D(1, 0)
+            if self.velocity.x < 0:
+                self.set_sprite(animation_index, int(self.sprite_sheet['walk_left']))
+                self.facing = pyasge.Point2D(-1, 0)
+            elif self.velocity.x > 0:
+                self.set_sprite(animation_index, int(self.sprite_sheet['walk_right']))
+                self.facing = pyasge.Point2D(1, 0)
 
         delta_x = self.player_speed * self.velocity.x * game_time.fixed_timestep
         delta_y = self.player_speed * self.velocity.y * game_time.fixed_timestep
@@ -61,10 +74,13 @@ class Player:
         self.sprite.x = self.sprite.x + delta_xy.x
         self.sprite.y = self.sprite.y + delta_xy.y
 
-    def set_sprite(self, x_start: int, width: int):
-        self.sprite.src_rect[pyasge.Sprite.SourceRectIndex.START_X] = int(x_start)
-        self.sprite.src_rect[pyasge.Sprite.SourceRectIndex.LENGTH_X] = int(width)
-        self.sprite.width = int(width)
+    def set_sprite(self, x: int, y: int):
+        self.sprite.src_rect[pyasge.Sprite.SourceRectIndex.START_X] = int(x)
+        self.sprite.src_rect[pyasge.Sprite.SourceRectIndex.START_Y] = int(y)
+        self.sprite.src_rect[pyasge.Sprite.SourceRectIndex.LENGTH_X] = self.SPRITE_SIZE.x
+        self.sprite.src_rect[pyasge.Sprite.SourceRectIndex.LENGTH_Y] = self.SPRITE_SIZE.y
+        self.sprite.width = self.SPRITE_SIZE.x
+        self.sprite.height = self.SPRITE_SIZE.y
 
     def get_sprite(self) -> pyasge.Point2D:
         sprite_centre = pyasge.Point2D(self.sprite.x + self.sprite.width * 0.5, self.sprite.y + self.sprite.height * 0.5)
@@ -106,3 +122,15 @@ class Player:
             return False
         else:
             return True
+
+    def animation_controller(self, game_time: pyasge.GameTime, speed_mod: float) -> int:
+        if self.elapsed_time >= 1.0:
+            self.elapsed_time = 0.0
+        else:
+            self.elapsed_time += game_time.fixed_timestep * speed_mod
+
+        index = int(self.elapsed_time * 4)
+        if index % 2 == 0:
+            return int(index * 46)
+        else:
+            return int(46)

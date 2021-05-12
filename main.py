@@ -6,6 +6,7 @@ from startmenu import StartMenu
 from gameover import GameOver
 from winnerwinner import WinnerWinner
 from levelmanager import LevelManager
+from nextlevel import NextLevel
 from gamestate import GameStateID
 from camera import Camera
 
@@ -55,6 +56,8 @@ class MyASGEGame(pyasge.ASGEGame):
                 self.active_state = WinnerWinner(self.data)
             elif new_state is GameStateID.LEVEL_MANAGER:
                 self.active_state = LevelManager(self.data)
+            elif new_state is GameStateID.NEXT_LEVEL:
+                self.active_state = NextLevel(self.data)
             else:
                 print("Unexpected error")
                 self.signalExit()

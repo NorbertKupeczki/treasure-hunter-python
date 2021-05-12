@@ -147,7 +147,7 @@ class GamePlay(GameState):
                 return GameStateID.WINNER_WINNER
             else:
                 # self.loadNextMap(self.data.level_selected + 1)    # when the player collects all of the gems pass onto the next level
-                print("Exit level")
+                return GameStateID.NEXT_LEVEL
 
         self.player.projectiles.update_projectiles(game_time)
 
