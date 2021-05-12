@@ -17,6 +17,7 @@ class GamePlay(GameState):
 
         self.gemsArray = []
         self.enemyArray = []
+        self.vaseArray = []
         self.loadNextMap(self.data.level_selected)
         #self.data.map = Map(str(self.data.level_selected))  # added
         #self.desired_path = []  # added
@@ -37,6 +38,8 @@ class GamePlay(GameState):
         # initialise gems array & score
         #self.gemsArray = [Gem(pyasge.Point2D(140, 300)), Gem(pyasge.Point2D(720, 400)), Gem(pyasge.Point2D(500, 800))]
         self.score = 0
+        self.reload = True
+        self.timer = 2.0
 
         # track key states
         self.keys = {
@@ -57,6 +60,10 @@ class GamePlay(GameState):
     def loadNextMap(self, level_num) -> None:    #create the wanted level
         self.data.map = Map(str(level_num))
 
+        #layers[2] is always gems
+        #layers[3] is always enemy pos
+
+
         for x in self.data.map.layers[2].tiles:
             self.gemsArray.append(Gem(pyasge.Point2D((x.coordinate[0] + 0.5) * self.data.tile_size,
                                                      (x.coordinate[1] + 0.5) * self.data.tile_size)))
@@ -64,11 +71,11 @@ class GamePlay(GameState):
         for x in self.data.map.layers[3].tiles:
             self.enemyArray.append((x.coordinate[0], x.coordinate[1]))
 
+        for x in self.data.map.layers[4].tiles:
+            self.vaseArray.append((x.coordinate[0], x.coordinate[1]))
+
 
         self.player = Player(self.data, self.data.map.starting_location)
-
-
-
 
     def click_event(self, event: pyasge.ClickEvent) -> None: # added
         if event.button is pyasge.MOUSE.MOUSE_BTN1:
@@ -110,22 +117,26 @@ class GamePlay(GameState):
                     print("No game pad connected!")
 
         if self.keys[pyasge.KEYS.KEY_SPACE]:
-            if event.action is pyasge.KEYS.KEY_PRESSED:
+            if event.action is pyasge.KEYS.KEY_PRESSED and self.reload:
                 self.player.shoot()
+                self.timer = 1
+                self.reload = False
 
         if self.keys[pyasge.KEYS.KEY_C]:
             if event.action is pyasge.KEYS.KEY_PRESSED:
                 self.hud.coords_on = not self.hud.coords_on
 
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
-        # print("SCORE: " + str(self.score))
-
         for gem in self.gemsArray:
             if gem.check_collision(self.player.sprite):
                 self.score += gem.value
                 self.hud.update_score(self.score)
                 self.gemsArray.remove(gem)
 
+        if self.reload is False:
+            self.timer -= game_time.fixed_timestep
+            if self.timer < 0:
+                self.reload = True
 
 
         if len(self.gemsArray) == 0:
