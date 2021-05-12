@@ -183,4 +183,5 @@ class GamePlay(GameState):
         for enemy in self.enemyArray:
             self.data.renderer.render(enemy.sprite)
         for gem in self.gemsArray:
-            self.data.renderer.render(gem.sprite)
+            if self.gemsArray[gem].spawnGem:
+                self.data.renderer.render(gem.sprite)
