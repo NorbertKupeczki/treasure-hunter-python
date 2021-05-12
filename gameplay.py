@@ -129,7 +129,10 @@ class GamePlay(GameState):
 
 
         if len(self.gemsArray) == 0:
-            self.loadNextMap(self.data.level_selected + 1)    # when the player collects all of the gems pass onto the next level
+            if self.data.level_selected == 7:
+                return GameStateID.WINNER_WINNER
+            else:
+                self.loadNextMap(self.data.level_selected + 1)    # when the player collects all of the gems pass onto the next level
 
 
 
