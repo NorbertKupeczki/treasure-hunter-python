@@ -20,8 +20,6 @@ class GamePlay(GameState):
         self.enemyArray = []
         self.vaseArray = []
         self.loadNextMap(self.data.level_selected)
-        #self.data.map = Map(str(self.data.level_selected))  # added
-        #self.desired_path = []  # added
 
         # initialising HUD and the player
         self.hud = HUD(data)
@@ -29,17 +27,6 @@ class GamePlay(GameState):
 
         self.entrance_door = Door(self.data.map.starting_location)
         self.exit_door = Door(self.data.map.end_location)
-
-        # initialising a single enemy for testing
-        # self.enemy = Enemy(self.data, pyasge.Point2D(800, 800))
-
-        # self.gemsArray = []
-        # for x in self.data.map.layers[2].tiles:
-        #     self.gemsArray.append(Gem(pyasge.Point2D((x.coordinate[0] + 0.5) * self.data.tile_size,
-        #                                              (x.coordinate[1] + 0.5) * self.data.tile_size)))
-        # initialise gems array & score <-- Legacy version
-        # self.gemsArray = [Gem(pyasge.Point2D(140, 300)), Gem(pyasge.Point2D(720, 400)), Gem(pyasge.Point2D(500, 800))]
-        self.score = 0
 
         # register the key handler for this class
         self.data.inputs.addCallback(pyasge.EventType.E_KEY, self.input)
@@ -50,8 +37,6 @@ class GamePlay(GameState):
         # initialise gems array & score
         #self.gemsArray = [Gem(pyasge.Point2D(140, 300)), Gem(pyasge.Point2D(720, 400)), Gem(pyasge.Point2D(500, 800))]
         self.score = 0
-        self.reload = True
-        self.timer = 1.0
 
         # track key states
         self.keys = {
@@ -126,16 +111,15 @@ class GamePlay(GameState):
                     print("No game pad connected!")
 
         if self.keys[pyasge.KEYS.KEY_SPACE]:
-            if event.action is pyasge.KEYS.KEY_PRESSED and self.reload:
+            if event.action is pyasge.KEYS.KEY_PRESSED:
                 self.player.shoot()
-                self.timer = 1
-                self.reload = False
 
         if self.keys[pyasge.KEYS.KEY_C]:
             if event.action is pyasge.KEYS.KEY_PRESSED:
                 self.hud.coords_on = not self.hud.coords_on
 
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
+        self.player.update(game_time)
         for gem in self.gemsArray:
             if gem.check_collision(self.player.sprite):
                 gem_loc = pyasge.Point2D((gem.sprite.x + gem.sprite.width * 0.5) / self.data.tile_size - 0.5,
@@ -144,26 +128,18 @@ class GamePlay(GameState):
                 for tile in self.data.map.layers[2].tiles:
                     if tile.coordinate[0] == int(gem_loc.x) and tile.coordinate[1] == int(gem_loc.y):
                         self.data.map.layers[2].tiles.remove(tile)
-                self.score += gem.value
-                self.hud.update_score(self.score)
+                self.data.score += gem.value
+                self.hud.update_score(self.data.score)
                 self.gemsArray.remove(gem)
-
 
         if not self.gemsArray and not self.exit_door.door_open:
             self.exit_door.door_open = True
-
-        if self.reload is False:
-            self.timer -= game_time.fixed_timestep
-            if self.timer < 0:
-                self.reload = True
-
 
         if not self.gemsArray and pyasge.Point2D.distance(self.player.get_sprite(),
                                                           self.exit_door.get_centre()) <= self.data.tile_size:
             if self.data.level_selected == 7:
                 return GameStateID.WINNER_WINNER
             else:
-                # self.loadNextMap(self.data.level_selected + 1)    # when the player collects all of the gems pass onto the next level
                 return GameStateID.NEXT_LEVEL
 
         self.player.projectiles.update_projectiles(game_time)
