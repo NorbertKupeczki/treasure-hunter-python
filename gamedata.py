@@ -22,3 +22,4 @@ class GameData:
         self.world_loc = pyasge.Point2D(0, 0)
         self.tile_loc = pyasge.Point2D(0, 0)
         self.level_selected = 1
+        self.score = 0

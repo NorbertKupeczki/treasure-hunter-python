@@ -17,6 +17,8 @@ class StartMenu(GameState):
         self.set_texts_position(self.texts, self.data.screen_size, 0.4)
         self.texts[self.menu_selected.value].colour = pyasge.COLOURS.GOLD
 
+        self.data.score = 0
+
         self.data.inputs.addCallback(pyasge.EventType.E_KEY, self.input)
         self.keys = {
             pyasge.KEYS.KEY_SPACE: False,
