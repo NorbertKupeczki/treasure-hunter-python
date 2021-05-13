@@ -31,7 +31,7 @@ class EnemyR:
         self.desired_path = []    #pathfinding stuff
         #self.goto = len(self.desired_path) - 1
 
-        self.enemy_speed = 50    #movement things
+        self.enemy_speed = 60    #movement things
         self.velocity = pyasge.Point2D()
         self.facing = pyasge.Point2D(0, 1)
 
@@ -46,7 +46,13 @@ class EnemyR:
         self.timer = 1.0
 
         self.path_check = True
-        self.timer_path = 3.0
+        self.timer_path = 15.0
+
+
+        self.old_player_pos = pyasge.Point2D(0,0)
+
+        # self.player_tile_x
+        # self.player_tile_y
 
 
         #evey tot amount of time check for the new path
@@ -61,148 +67,96 @@ class EnemyR:
             self.previous_condition = self.current_condition
 
 
-        # if self.reload is False:
-        #     self.timer -= self.data.game_time.fixed_timestep
-        #     if self.timer < 0:
-        #         self.reload = True
-        #         print("calleddadaa")
+
 
 
 
     def move_enemy(self, game_time: pyasge.GameTime, player_location: pyasge.Point2D, player_location_tile: pyasge.Point2D):
-
-        if self.path_check is False:
-            self.timer_path -= game_time.fixed_timestep
-            if self.timer_path < 0:
-                self.path_check = True
-        else:
-            temp_string_x = str(self.sprite.x / self.data.tile_size)   # the click position in pyASGE is relative to the world map instead of the size of the screen, if we divide it by 8 we get the tile number
-            temp_string_x = int(temp_string_x.split(".")[0])   # it will most likely be a long float value, therefore by saving it as a string we are able to get the numbers before the "."
-            temp_string_y = str(self.sprite.y / self.data.tile_size)
-            temp_string_y = int(temp_string_y.split(".")[0])
-            touple_coord = (temp_string_x, temp_string_y)       # save it as a touple to be sent off
-            #print(touple_coord)
-
-            self.desired_path = Pathfinding(touple_coord, (int(player_location_tile.x), int(player_location_tile.y)), self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path  # call the class to give the coordinates and save everything in the array
-
-
-
-
-
-
-
-            for i in range(len(self.desired_path)):  # debugging purpose, prints out the values of the above array
-                print(self.desired_path[i].tile)
-            print("this")
-            print("t--------------------------------------")
-            self.path_check = False
-            self.timer_path = 3.0
-
-
-
-
-
 
         if self.reload is False:
             self.timer -= game_time.fixed_timestep
             if self.timer < 0:
                 self.reload = True
 
-        #print(player_location)    # player location given in coord
+        curr_pos_prev = (self.sprite.x, self.sprite.y)
 
-        #mid_sprite_x = self.sprite.x + self.sprite.width/2
-        #mid_sprite_y = self.sprite.y + self.sprite.height/2
-
-        # player_location_x = player_location.x + 23
-        # player_location_y = player_location.y + 31
-
-        relation = self.side_check(self.sprite.x, self.sprite.y, player_location.x, player_location.y, 46, 62)
-        # print("-------------------")
-        # print("-------------------")
-        #print(player_location_tile)
-
-        if relation == 4:
-            #then we want to minus the x by 5
-            #print("the zmobie is on the left of the player ")
-            self.facing = pyasge.Point2D(1, 0)
-            player_location_tile.x = player_location_tile.x - 5
-
-        elif relation == 2:
-            # then we want to add the x by 5
-            #print("the zmobie is on the right of the player ")
-            self.facing = pyasge.Point2D(-1, 0)
-            player_location_tile.x = player_location_tile.x + 5
-
-        elif relation == 1:
-            # then we want to add the y by 5
-            #print("the zmobie is on the top of the player ")
-            self.facing = pyasge.Point2D(0, 1)
-            player_location_tile.y = player_location_tile.y - 5
-
-        elif relation == 3:
-            self.facing = pyasge.Point2D(0, -1)
-            player_location_tile.y = player_location_tile.y + 5
-            #print("the zmobie is on the bottom of the player ")
-            # then we want to minus the y by 5
+        player_pos = player_location
 
 
+        if int(self.old_player_pos.x) != int(player_location_tile.x) or int(self.old_player_pos.y) != int(player_location_tile.y):
+
+            print("this is called -----------------------------------------\n\n\n")
+            self.desired_path.clear()
+            self.old_player_pos = player_location_tile
+
+            player_pos = player_location
+
+            relation = self.side_check(self.sprite.x, self.sprite.y, player_pos.x, player_pos.y, 46, 62)
+
+            if relation != 0:
+
+                temp_string_x = str((self.sprite.x +35 ) / self.data.tile_size)
+                temp_string_x = int(temp_string_x.split(".")[0])
+                temp_string_y = str((self.sprite.y + 60) / self.data.tile_size)
+                temp_string_y = int(temp_string_y.split(".")[0])
+                enemy_curr_tile_cord = (temp_string_x, temp_string_y)
+
+                goal_tile = self.tile_check(player_location_tile.x, player_location_tile.y,relation)
+                self.desired_path.clear()
+                print(int(goal_tile[0]), int(goal_tile[1]))
+                print(enemy_curr_tile_cord)
+
+                self.desired_path = Pathfinding(enemy_curr_tile_cord,
+                                                (int(goal_tile[0]), int(goal_tile[1])),
+                                                self.data.map.cost_map, self.data.map.width,
+                                                self.data.map.height).decided_path
+
+                self.desired_path.pop()
+
+        else:
+            pass
 
 
-        if relation != 0:
+        if len(self.desired_path) > 0:
 
-            # print(player_location_tile)
-            curr_pos_prev = (self.sprite.x, self.sprite.y)
-            # print(self.side_check(player_location.x, player_location.y, self.sprite.x, self.sprite.y, self.sprite.width, self.sprite.height))
+            player_pos.y = int(self.desired_path[len(self.desired_path) - 1].tile[1] * 64)
+            player_pos.x = int(self.desired_path[len(self.desired_path) - 1].tile[0] * 64)
 
-
-
-
-            player_location.y = player_location_tile.y * 64
-            player_location.x = player_location_tile.x * 64
-            # print(player_location.y)
-
-            if abs(int(player_location.x) - int(self.sprite.x)) < 2:
+            if abs(int(self.desired_path[len(self.desired_path) - 1].tile[0] * 64) - int(self.sprite.x)) < 2:
                 self.velocity.x = 0
-            elif player_location.x > self.sprite.x:
+            elif player_pos.x > self.sprite.x:
                 self.velocity.x = 1
-            elif player_location.x < self.sprite.x:
+            elif player_pos.x < self.sprite.x:
                 self.velocity.x = -1
 
-            if abs(int(player_location.y) - int(self.sprite.y)) < 2:
+            if abs(int(self.desired_path[len(self.desired_path) - 1].tile[1] * 64) - int(self.sprite.y)) < 2:
+
                 self.velocity.y = 0
-            elif player_location.y > self.sprite.y:
+            elif player_pos.y > self.sprite.y:
+
                 self.velocity.y = 1
-            elif player_location.y < self.sprite.y:
+            elif player_pos.y < self.sprite.y:
+
                 self.velocity.y = -1
 
             delta_x = self.enemy_speed * self.velocity.x * game_time.fixed_timestep
             delta_y = self.enemy_speed * self.velocity.y * game_time.fixed_timestep
-
-            #delta_xy = self.check_collision(delta_x, delta_y) <-- Temporary disabled
 
             self.sprite.x = self.sprite.x + delta_x
             self.sprite.y = self.sprite.y + delta_y
 
             curr_pos_new = (self.sprite.x, self.sprite.y)
 
+            if curr_pos_new == curr_pos_prev:
+                self.desired_path.pop()
 
-            if curr_pos_new == curr_pos_prev and self.reload:
+        else:
+
+            if self.reload is True:
                 self.shoot()
                 self.timer = 1
                 self.reload = False
-
-
-
-
-
-        # if self.current_condition != DamageStates.DEAD:
-        #     self.desired_path = Pathfinding((int(self.sprite.x / self.data.tile_size), int(self.sprite.y / self.data.tile_size)),(int(player_location.x / self.data.tile_size), int(player_location.y / self.data.tile_size)), self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
-        #     self.goto = len(self.desired_path) - 1
-        #     # self.sprite = self.goto[0]
-        #
-        #     # Checks if enemy sprite touches player sprite
-        #     if abs(int(player_location.x) - int(self.sprite.x)) < 2 or abs(int(player_location.y) - int(self.sprite.y)) < 2:
-        #         pass
+                self.desired_path.clear()
 
 
 
@@ -228,9 +182,52 @@ class EnemyR:
         self.projectiles.shoot(spawn_point, self.facing)
 
 
-    def tile_check(self, tile_x, tile_y):
-        #this is where we can check if the tiles exist and possible pathfindg
-        pass
+    def tile_check(self,player_x, player_y, relation):
+
+        player_curr_tile_y = player_y
+        player_curr_tile_x = player_x
+
+        player_saved_tile = (player_x, player_y)
+
+        found = False
+        for z in range(5):
+            if z == 0:
+                pass
+            else:
+                if found == False:
+
+                    if relation == 4:
+                        player_curr_tile_x = player_x - z
+                        self.facing = pyasge.Point2D(1, 0)
+
+
+                    elif relation == 2:
+                        player_curr_tile_x = player_x + z
+                        self.facing = pyasge.Point2D(-1, 0)
+
+
+                    elif relation == 1:
+                        player_curr_tile_y = player_y - z
+                        self.facing = pyasge.Point2D(0, 1)
+
+                    elif relation == 3:
+                        player_curr_tile_y = player_y + z
+                        self.facing = pyasge.Point2D(0, -1)
+
+
+                    if self.data.map.cost_map[int(player_curr_tile_y)][int(player_curr_tile_x)] > 10000:
+                        print(self.data.map.cost_map[int(player_curr_tile_y)][int(player_curr_tile_x)])
+                        found = True
+                        break
+                    else:
+                        player_saved_tile = (player_curr_tile_x, player_curr_tile_y)
+
+
+        if found == True:
+            return player_saved_tile
+        else:
+            return player_saved_tile
+
 
 
 
