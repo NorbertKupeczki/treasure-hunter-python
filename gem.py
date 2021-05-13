@@ -16,6 +16,3 @@ class Gem:
                 return True
         else:
             return False
-
-
-

@@ -26,4 +26,3 @@ class Bullet:
             self.sprite.rotation = 90 * 3.1415 / 180
         else:
             self.sprite.rotation = - 90 * 3.1415 / 180
-
