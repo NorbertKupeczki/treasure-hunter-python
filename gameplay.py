@@ -20,6 +20,7 @@ class GamePlay(GameState):
         self.update_list = []
 
         self.gems = []
+        self.vases = []
         self.data.enemies = []
         self.data.breakables = []
         self.load_map(self.data.level_selected)
@@ -76,6 +77,7 @@ class GamePlay(GameState):
 
         for x in self.data.map.layers[4].tiles:
             self.data.breakables.append((x.coordinate[0], x.coordinate[1]))
+            self.vases.append(Vase(pyasge.Point2D(x.coordinate[0] * self.data.tile_size, x.coordinate[1] * self.data.tile_size)))
 
     def click_event(self, event: pyasge.ClickEvent) -> None:  # added
         if event.button is pyasge.MOUSE.MOUSE_BTN1:
@@ -125,6 +127,9 @@ class GamePlay(GameState):
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
         for item in self.update_list:
             item.update(game_time)
+
+
+
         self.player.move_player(game_time, self.keys, self.game_pad)
 
         if self.gems:
@@ -155,10 +160,12 @@ class GamePlay(GameState):
         # damage and destroy the vases as bullets hit them
 
         for bullet in self.player.projectiles.projectiles:
-            for vase in self.vaseArray:
+            for vase in self.vases:
                 if vase.check_collision(bullet.sprite):
                     vase.hp -= 1
                     print(vase.hp)
+                    vase.update(game_time)
+
 
         if self.player.game_pad_enabled:
             if self.data.inputs.getGamePad(0).RIGHT_TRIGGER != -1.0:
@@ -188,7 +195,7 @@ class GamePlay(GameState):
             self.data.renderer.render(enemy.sprite)
         for gem in self.gems:
             self.data.renderer.render(gem.sprite)
-        for vase in self.vaseArray:
+        for vase in self.vases:
             vase.redraw()
             self.data.renderer.render(vase.sprite)
             if vase.gem.spawnGem:
