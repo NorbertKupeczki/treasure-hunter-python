@@ -9,6 +9,7 @@ from map import Map
 # from A_star_pathfinding import Pathfinding
 
 from gem import Gem
+from vase import Vase
 
 
 class GamePlay(GameState):
@@ -151,6 +152,14 @@ class GamePlay(GameState):
         # Moving the enemy towards the player
         # self.enemy.move_enemy(game_time, pyasge.Point2D(self.player.sprite.x, self.player.sprite.y))  #to turn back on
 
+        # damage and destroy the vases as bullets hit them
+
+        for bullet in self.player.projectiles.projectiles:
+            for vase in self.vaseArray:
+                if vase.check_collision(bullet.sprite):
+                    vase.hp -= 1
+                    print(vase.hp)
+
         if self.player.game_pad_enabled:
             if self.data.inputs.getGamePad(0).RIGHT_TRIGGER != -1.0:
                 self.player.shoot()
@@ -163,6 +172,8 @@ class GamePlay(GameState):
             return GameStateID.WINNER_WINNER
         else:
             return GameStateID.GAMEPLAY
+
+
 
     def render(self, game_time: pyasge.GameTime) -> None:
         corner = self.data.camera.look_at(self.player.get_sprite())
@@ -177,3 +188,8 @@ class GamePlay(GameState):
             self.data.renderer.render(enemy.sprite)
         for gem in self.gems:
             self.data.renderer.render(gem.sprite)
+        for vase in self.vaseArray:
+            vase.redraw()
+            self.data.renderer.render(vase.sprite)
+            if vase.gem.spawnGem:
+                self.data.renderer.render(vase.gem.sprite)
