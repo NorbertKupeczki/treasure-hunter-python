@@ -10,8 +10,6 @@ class Player:
         self.sprite.loadTexture("/data/images/player_sh.png")
         self.SPRITE_SIZE = pyasge.Point2D(int(self.sprite.getTexture().width * 0.334),
                                           int(self.sprite.getTexture().height * 0.25))
-
-        print(self.SPRITE_SIZE)
         self.sprite_sheet = {
             'walk_up': 0,
             'walk_right': 62,
@@ -28,11 +26,12 @@ class Player:
         self.game_pad_sensitivity = 0.2
         self.facing = pyasge.Point2D(0, 1)
         self.projectiles = Projectiles(data)
-        self.reload_time = 1.0
+        self.RELOAD_TIME = 0.5
+        self.reload_time = self.RELOAD_TIME
         self.elapsed_time = 0.0
 
     def update(self, game_time: pyasge.GameTime):
-        if self.reload_time < 1.0:
+        if self.reload_time < self.RELOAD_TIME:
             self.reload_time += game_time.fixed_timestep
 
         self.projectiles.update_projectiles(game_time)
@@ -124,7 +123,7 @@ class Player:
     def shoot(self):
         spawn_point = pyasge.Point2D(self.sprite.x + self.sprite.width * 0.5,
                                      self.sprite.y + self.sprite.height * 0.5)
-        if self.reload_time >= 1.0:
+        if self.reload_time >= self.RELOAD_TIME:
             self.projectiles.shoot(spawn_point, self.facing)
             self.reload_time = 0.0
 

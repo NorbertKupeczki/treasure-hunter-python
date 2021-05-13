@@ -5,6 +5,7 @@ from enemy import Enemy
 from rangedEnemy import EnemyR
 from door import Door
 from hud import HUD
+from projetiles import Projectiles
 
 from map import Map
 
@@ -16,16 +17,13 @@ class GamePlay(GameState):
     def __init__(self, data):
         super().__init__(data)
         self.id = GameStateID.GAMEPLAY
-
-
+        self.data.enemy_projectiles = Projectiles(data)
         self.update_list = []
 
         self.data.gems = []
         self.data.enemies = []
         self.data.breakables = []
-        self.data.enemiesRange = []
         self.load_map(self.data.level_selected)
-
 
         # initialising HUD and the player
         self.hud = HUD(data)
@@ -36,15 +34,8 @@ class GamePlay(GameState):
         self.exit_door = Door(self.data.map.end_location)
         self.update_list.append(self.exit_door)
 
-
         # register the key handler for this class
         self.data.inputs.addCallback(pyasge.EventType.E_KEY, self.input)
-
-        # register the mouse handler for this class # added
-        self.data.inputs.addCallback(pyasge.EventType.E_MOUSE_CLICK, self.click_event)  # added
-
-        # initialise gems array & score
-        self.score = 0
 
         # track key states
         self.keys = {
@@ -71,44 +62,20 @@ class GamePlay(GameState):
             self.data.gems.append(Gem(pyasge.Point2D((gem.coordinate[0] + 0.5) * self.data.tile_size,
                                                      (gem.coordinate[1] + 0.5) * self.data.tile_size)))
 
-        rangeEnemyCounter = 0
-
+        ranged_enemy_counter = 0
         for enemy in self.data.map.layers[3].tiles:
-
-            rangeEnemyCounter += 1
-            if rangeEnemyCounter == 3:
-                self.data.enemiesRange.append(EnemyR(self.data, pyasge.Point2D(enemy.coordinate[0] * self.data.tile_size, enemy.coordinate[1] * self.data.tile_size)))
-                rangeEnemyCounter = 0
+            ranged_enemy_counter += 1
+            if ranged_enemy_counter == 3:
+                self.data.enemies.append(EnemyR(self.data, pyasge.Point2D(enemy.coordinate[0] * self.data.tile_size,
+                                                                          enemy.coordinate[1] * self.data.tile_size)))
+                ranged_enemy_counter = 0
             else:
-                self.data.enemies.append(Enemy(self.data, pyasge.Point2D(enemy.coordinate[0] * self.data.tile_size, enemy.coordinate[1] * self.data.tile_size)))
+                self.data.enemies.append(Enemy(self.data, pyasge.Point2D(enemy.coordinate[0] * self.data.tile_size,
+                                                                         enemy.coordinate[1] * self.data.tile_size)))
 
-
-        self.player = Player(self.data, self.data.map.starting_location)
-
-        for x in self.data.map.layers[4].tiles:
-            self.data.breakables.append(Vase(pyasge.Point2D(x.coordinate[0] * self.data.tile_size,
-                                                            x.coordinate[1] * self.data.tile_size)))
-
-    def click_event(self, event: pyasge.ClickEvent) -> None:  # added
-        pass
-        if event.button is pyasge.MOUSE.MOUSE_BTN1:
-            if event.action is pyasge.MOUSE.BUTTON_PRESSED:   # if the left click is detected
-                pass
-                # temp_string_x = str(event.x / self.data.tile_size)   # the click position in pyASGE is relative to the world map instead of the size of the screen, if we divide it by 8 we get the tile number
-                # temp_string_x = int(temp_string_x.split(".")[0])   # it will most likely be a long float value, therefore by saving it as a string we are able to get the numbers before the "."
-                # temp_string_y = str(event.y / self.data.tile_size)
-                # temp_string_y = int(temp_string_y.split(".")[0])
-                # touple_coord = (temp_string_x, temp_string_y)       # save it as a touple to be sent off
-                #
-                # if 0 <= temp_string_x < self.data.map.width:  # check if the coordinates were in the actually map and not outside of the map
-                #     if 0 <= temp_string_y < self.data.map.height:
-                #         if self.data.map.cost_map[temp_string_y][temp_string_x] < 10000:    # if the cost of the thing clicked on is higher than this amount that means
-                #                                                                         # the player clicked on a wall or something so don't initiate the pathfinding
-                #             self.desired_path = Pathfinding((0, 0), touple_coord, self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path   # call the class to give the coordinates and save everything in the array
-                #
-                # for i in self.data.enemies:    # debugging purpose, prints out the values of the above array
-                #     print(int(i.sprite.x), int(i.sprite.y))
-
+        for breakable in self.data.map.layers[4].tiles:
+            self.data.breakables.append(Vase(pyasge.Point2D(breakable.coordinate[0] * self.data.tile_size,
+                                                            breakable.coordinate[1] * self.data.tile_size)))
 
     def input(self, event: pyasge.KeyEvent) -> None:
         if event.action is not pyasge.KEYS.KEY_REPEATED:
@@ -133,8 +100,6 @@ class GamePlay(GameState):
             if event.action is pyasge.KEYS.KEY_PRESSED:
                 self.hud.coords_on = not self.hud.coords_on
 
-
-
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
 
         for item in self.update_list:
@@ -142,10 +107,11 @@ class GamePlay(GameState):
 
         self.player.move_player(game_time, self.keys, self.game_pad)
 
-        for rangedEnemy in self.data.enemiesRange:
-            rangedEnemy.move_enemy(game_time, pyasge.Point2D(self.data.world_loc.x, self.data.world_loc.y), pyasge.Point2D(self.data.tile_loc.x, self.data.tile_loc.y))
-            rangedEnemy.projectiles.update_projectiles(game_time)
+        for enemy in self.data.enemies:
+            enemy.move_enemy(game_time, pyasge.Point2D(self.data.world_loc.x, self.data.world_loc.y),
+                             pyasge.Point2D(self.data.tile_loc.x, self.data.tile_loc.y))
 
+        self.data.enemy_projectiles.update_projectiles(game_time)
 
         if self.data.gems:
             for gem in self.data.gems:
@@ -168,7 +134,6 @@ class GamePlay(GameState):
                     return GameStateID.WINNER_WINNER
                 else:
                     return GameStateID.NEXT_LEVEL
-
 
         # Moving the enemy towards the player
         # self.enemy.move_enemy(game_time, pyasge.Point2D(self.player.sprite.x, self.player.sprite.y))  #to turn back on
@@ -196,10 +161,12 @@ class GamePlay(GameState):
         self.player.render_bullets()
         for enemy in self.data.enemies:
             self.data.renderer.render(enemy.sprite)
+        for projectile in self.data.enemy_projectiles.projectiles:
+            self.data.renderer.render(projectile.sprite)
 
-        for enemyR in self.data.enemiesRange:
-            self.data.renderer.render(enemyR.sprite)
-            enemyR.render_bullets(self.data.renderer)
+        # for enemyR in self.data.enemiesRange:
+        #     self.data.renderer.render(enemyR.sprite)
+        #     enemyR.render_bullets(self.data.renderer)
 
         for gem in self.data.gems:
             self.data.renderer.render(gem.sprite)

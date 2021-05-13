@@ -48,13 +48,19 @@ class Enemy:
             self.redraw()
             self.previous_condition = self.current_condition
 
-    def move_enemy(self, game_time: pyasge.GameTime, player_location: pyasge.Point2D):
-        print(str(abs(int(player_location.x) - int(self.sprite.x))))
-        if abs(int(player_location.x) - int(self.sprite.x)) < 400 and abs(int(player_location.y) - int(self.sprite.y)) < 400:
-            self.primitivePathfinding(game_time, player_location)
-        ## Checks if enemy sprite touches player sprite
-        if abs(int(player_location.x) - int(self.sprite.x)) < 2 or abs(int(player_location.y) - int(self.sprite.y)) < 2:
-            pass
+    def move_enemy(self, game_time: pyasge.GameTime,
+                   player_location: pyasge.Point2D,
+                   player_location_tile: pyasge.Point2D):
+
+        # print(str(abs(int(player_location.x) - int(self.sprite.x))))
+        # if abs(int(player_location.x) - int(self.sprite.x)) < 400 and abs(
+        #         int(player_location.y) - int(self.sprite.y)) < 400:
+        #     self.primitivePathfinding(game_time, player_location)
+        # # Checks if enemy sprite touches player sprite
+        # if abs(int(player_location.x) - int(self.sprite.x)) < \
+        #         2 or abs(int(player_location.y) - int(self.sprite.y)) < 2:
+        #     pass
+        pass
 
     def primitivePathfinding(self, game_time: pyasge.GameTime, player_location: pyasge.Point2D):
         if abs(int(player_location.x) - int(self.sprite.x)) < 2:

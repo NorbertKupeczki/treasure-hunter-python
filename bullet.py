@@ -1,8 +1,9 @@
 import pyasge
+from enum import Enum
 
 
 class Bullet:
-    def __init__(self, spawn: pyasge.Point2D, direction: pyasge.Point2D):
+    def __init__(self, spawn: pyasge.Point2D, direction: pyasge.Point2D, bullet_type: str):
         self.speed = 600
         self.velocity = pyasge.Point2D(direction)
         self.sprite = pyasge.Sprite()
@@ -11,6 +12,11 @@ class Bullet:
         self.set_facing(direction)
         self.sprite.x = spawn.x - self.sprite.width * 0.5
         self.sprite.y = spawn.y - self.sprite.height * 0.5
+        self.bullet_type = None
+        if bullet_type == 'player':
+            self.bullet_type = BulletType.Player
+        elif bullet_type == 'enemy':
+            self.bullet_type = BulletType.Enemy
 
     def centre(self) -> pyasge.Point2D:
         sprite_centre = pyasge.Point2D(self.sprite.x + self.sprite.width * 0.5,
@@ -26,3 +32,8 @@ class Bullet:
             self.sprite.rotation = 90 * 3.1415 / 180
         else:
             self.sprite.rotation = - 90 * 3.1415 / 180
+
+
+class BulletType(Enum):
+    Enemy = 0,
+    Player = 1

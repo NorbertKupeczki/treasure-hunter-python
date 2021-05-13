@@ -20,9 +20,9 @@ class GameData:
         self.camera = None
         self.map = None
         self.enemies = None
+        self.enemy_projectiles = None
         self.breakables = None
         self.gems = None
-        self.enemiesRange = None
 
         self.tile_size = int(64)
         self.world_loc = pyasge.Point2D(0, 0)

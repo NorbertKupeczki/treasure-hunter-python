@@ -18,7 +18,7 @@ class EnemyR:
 
         self.sprite = pyasge.Sprite()
         self.sprite.loadTexture(self.states[0])
-        self.sprite.scale = 0.35
+        # self.sprite.scale = 0.35
 
         self.data = data  # data of the game
 
@@ -58,14 +58,18 @@ class EnemyR:
             if self.timer < 0:
                 self.reload = True
 
-        temp_string_x = str((self.sprite.x + 35) / self.data.tile_size)
-        temp_string_x = int(temp_string_x.split(".")[0])
-        temp_string_y = str((self.sprite.y + 60) / self.data.tile_size)
-        temp_string_y = int(temp_string_y.split(".")[0])
-        enemy_curr_tile_cord = (temp_string_x, temp_string_y)
+        # temp_string_x = str((self.sprite.x + 35) / self.data.tile_size)
+        # temp_string_x = int(temp_string_x.split(".")[0])
+        # temp_string_y = str((self.sprite.y + 60) / self.data.tile_size)
+        # temp_string_y = int(temp_string_y.split(".")[0])
+        # enemy_curr_tile_cord = (temp_string_x, temp_string_y)
+        """
+        The below calculation is the same as above, just shorter - Norbert
+        """
+        enemy_curr_tile_cord = (int(((self.sprite.x + self.sprite.width * 0.5) / self.data.tile_size)),  # 35
+                                int((self.sprite.y + self.sprite.height * 0.5) / self.data.tile_size))   # 60
 
         distance = self.heuristic(player_location_tile.x, player_location_tile.y, enemy_curr_tile_cord)
-
 
         if distance < 5.5:
             curr_pos_prev = (self.sprite.x, self.sprite.y)
@@ -77,12 +81,9 @@ class EnemyR:
                 self.desired_path.clear()
                 self.old_player_pos = player_location_tile
 
-
                 if int(enemy_curr_tile_cord[0]) == int(player_location_tile.x) and int(enemy_curr_tile_cord[1]) == int(player_location_tile.y):
 
                     self.desired_path.clear()
-
-
 
                     if self.data.map.cost_map[int(enemy_curr_tile_cord[1]) + 1][int(enemy_curr_tile_cord[0])] < 1000:  # go to the bottom
                         self.desired_path = Pathfinding(enemy_curr_tile_cord, (int(enemy_curr_tile_cord[0]), int(enemy_curr_tile_cord[1]) + 1), self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
@@ -114,14 +115,13 @@ class EnemyR:
 
                         self.desired_path.pop()
 
-
             else:
                 pass
 
             if len(self.desired_path) > 0:
 
-                player_pos.y = int(self.desired_path[len(self.desired_path) - 1].tile[1] * 64)
-                player_pos.x = int(self.desired_path[len(self.desired_path) - 1].tile[0] * 64)
+                player_pos.y = int(self.desired_path[len(self.desired_path) - 1].tile[1] * self.data.tile_size)
+                player_pos.x = int(self.desired_path[len(self.desired_path) - 1].tile[0] * self.data.tile_size)
 
                 if abs(int(self.desired_path[len(self.desired_path) - 1].tile[0] * 64) - int(self.sprite.x)) < 2:
                     self.velocity.x = 0
@@ -165,19 +165,19 @@ class EnemyR:
 
         if main_x_pos < square_x:  # left
             side_touched = 4
-        elif (main_x_pos > square_x + square_width):  # right
+        elif main_x_pos > square_x + square_width:  # right
             side_touched = 2
-
-        if (main_y_pos < square_y):  # top
+        if main_y_pos < square_y:  # top
             side_touched = 1
-        elif (main_y_pos > square_y + rh):  # bottom
+        elif main_y_pos > square_y + rh:  # bottom
             side_touched = 3
 
         return side_touched
 
     def shoot(self):
-        spawn_point = pyasge.Point2D(self.sprite.x + 35, self.sprite.y + 60)
-        self.projectiles.shoot(spawn_point, self.facing)
+        spawn_point = pyasge.Point2D(self.sprite.x + self.sprite.width * 0.5,
+                                     self.sprite.y + self.sprite.height * 0.5)
+        self.data.enemy_projectiles.zombie_shoot(spawn_point, self.facing)
 
     def tile_check(self, player_x, player_y, relation):
 
