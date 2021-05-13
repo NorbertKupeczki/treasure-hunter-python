@@ -13,8 +13,8 @@ class Camera:
         self.default_view.max_y = self.data.screen_size[1]
 
     def look_at(self, player_sprite: pyasge.Point2D) -> pyasge.Point2D:
-        camera_x = int(player_sprite.x)
-        camera_y = int(player_sprite.y)
+        camera_x = player_sprite.x
+        camera_y = player_sprite.y
 
         if camera_x <= self.data.screen_size[0] * 0.5:
             camera_x = self.data.screen_size[0] * 0.5
@@ -26,6 +26,6 @@ class Camera:
         elif camera_y >= self.data.map.height * self.data.tile_size - self.data.screen_size[1] * 0.5:
             camera_y = self.data.map.height * self.data.tile_size - self.data.screen_size[1] * 0.5
 
-        self.camera.lookAt(pyasge.Point2D(camera_x, camera_y))
+        self.camera.lookAt(pyasge.Point2D(round(camera_x), round(camera_y)))
 
         return pyasge.Point2D(self.camera.view.min_x, self.camera.view.min_y)

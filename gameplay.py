@@ -132,9 +132,9 @@ class GamePlay(GameState):
         if self.data.gems:
             for gem in self.data.gems:
                 if gem.check_collision(self.player.sprite):
-                    gem_loc = pyasge.Point2D((gem.sprite.x + gem.sprite.width * 0.5) / self.data.tile_size - 0.5,
-                                             (gem.sprite.y + gem.sprite.height * 0.5) / self.data.tile_size - 0.5)
-                    print(f"Gem picked up from ({int(gem_loc.x)},{int(gem_loc.y)})")
+                    # gem_loc = pyasge.Point2D((gem.sprite.x + gem.sprite.width * 0.5) / self.data.tile_size - 0.5,
+                    #                          (gem.sprite.y + gem.sprite.height * 0.5) / self.data.tile_size - 0.5)
+                    # print(f"Gem picked up from ({int(gem_loc.x)},{int(gem_loc.y)})")
                     # for tile in self.data.map.layers[2].tiles:
                     #     if tile.coordinate[0] == int(gem_loc.x) and tile.coordinate[1] == int(gem_loc.y):
                     #         self.data.map.layers[2].tiles.remove(tile)
@@ -153,9 +153,6 @@ class GamePlay(GameState):
 
         # Moving the enemy towards the player
         # self.enemy.move_enemy(game_time, pyasge.Point2D(self.player.sprite.x, self.player.sprite.y))  #to turn back on
-
-        # damage and destroy the vases as bullets hit them
-
         if self.player.game_pad_enabled:
             if self.data.inputs.getGamePad(0).RIGHT_TRIGGER != -1.0:
                 self.player.shoot()
