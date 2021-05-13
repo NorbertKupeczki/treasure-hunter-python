@@ -30,7 +30,7 @@ class Enemy:
         self.goto_x = len(self.desired_path) + (self.current_index * 2)
         self.goto_y = len(self.desired_path) + self.current_index
 
-        self.enemy_speed = 150
+        self.enemy_speed = 60
         self.velocity = pyasge.Point2D()
         self.facing = pyasge.Point2D(0, 1)
 
@@ -41,22 +41,24 @@ class Enemy:
         self.previous_condition = DamageStates.HEALTHY
         # self.projectiles = Projectiles()
 
-    def update(self):
+    def update(self, game_time: pyasge.GameTime, player_location: pyasge.Point2D):
         self.fsm.update()
+        self.move_enemy(game_time, player_location)
 
         if self.current_condition != self.previous_condition:
             self.redraw()
             self.previous_condition = self.current_condition
 
-    def move_enemy(self, game_time: pyasge.GameTime, player_location: pyasge.Point2D):
+    def move_enemy(self, game_time, player_location):
         print(str(abs(int(player_location.x) - int(self.sprite.x))))
         if abs(int(player_location.x) - int(self.sprite.x)) < 400 and abs(int(player_location.y) - int(self.sprite.y)) < 400:
             self.primitivePathfinding(game_time, player_location)
+            #self.aStarPathfinding(game_time, player_location) <--- Disabled currently until fix can be found with goto.x and goto.y (don't update every frame)
         ## Checks if enemy sprite touches player sprite
         if abs(int(player_location.x) - int(self.sprite.x)) < 2 or abs(int(player_location.y) - int(self.sprite.y)) < 2:
             pass
 
-    def primitivePathfinding(self, game_time: pyasge.GameTime, player_location: pyasge.Point2D):
+    def primitivePathfinding(self, game_time, player_location):
         if abs(int(player_location.x) - int(self.sprite.x)) < 2:
             self.velocity.x = 0
         elif player_location.x > self.sprite.x:
@@ -78,7 +80,7 @@ class Enemy:
         self.sprite.x = self.sprite.x + delta_x
         self.sprite.y = self.sprite.y + delta_y
 
-    def aStarPathfinding(self, game_time: pyasge.GameTime, player_location: pyasge.Point2D):
+    def aStarPathfinding(self, game_time, player_location):
         temp_string_x = str(self.sprite.x / self.data.tile_size)
         temp_string_x = int(temp_string_x.split(".")[0])
         temp_string_y = str(self.sprite.y / self.data.tile_size)
@@ -92,7 +94,7 @@ class Enemy:
         self.goto_y = len(self.desired_path) + self.current_index
         self.goto_x = self.goto_x * self.data.tile_size
         self.goto_y = self.goto_y * self.data.tile_size
-        self.desired_path = 0
+        self.desired_path.clear()
         # Debugging purposes
         print(str(self.goto_x) + "= goto x")
         print(str(self.goto_y) + "= goto y")
