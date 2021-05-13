@@ -135,8 +135,6 @@ class GamePlay(GameState):
                 else:
                     return GameStateID.NEXT_LEVEL
 
-        # Moving the enemy towards the player
-        # self.enemy.move_enemy(game_time, pyasge.Point2D(self.player.sprite.x, self.player.sprite.y))  #to turn back on
         if self.player.game_pad_enabled:
             if self.data.inputs.getGamePad(0).RIGHT_TRIGGER != -1.0:
                 self.player.shoot()
@@ -172,3 +170,9 @@ class GamePlay(GameState):
             self.data.renderer.render(gem.sprite)
         for vase in self.data.breakables:
             self.data.renderer.render(vase.sprite)
+
+        for enemy in self.data.enemies:
+            self.data.renderer.render(enemy.sprite)
+        for enemyR in self.data.enemiesRange:
+            self.data.renderer.render(enemyR.sprite)
+            enemyR.render_bullets(self.data.renderer)
