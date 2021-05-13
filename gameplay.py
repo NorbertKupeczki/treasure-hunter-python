@@ -173,6 +173,3 @@ class GamePlay(GameState):
 
         for enemy in self.data.enemies:
             self.data.renderer.render(enemy.sprite)
-        for enemyR in self.data.enemiesRange:
-            self.data.renderer.render(enemyR.sprite)
-            enemyR.render_bullets(self.data.renderer)
