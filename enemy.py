@@ -72,45 +72,38 @@ class Enemy:
 
         # self.sprite.x = self.sprite.x + delta_x
         # self.sprite.y = self.sprite.y + delta_y
+        if abs(int(player_location.x) - int(self.sprite.x)) < 150 or abs(int(player_location.y) - int(self.sprite.y)) < 150:
+            temp_string_x = str(self.sprite.x / self.data.tile_size)
+            temp_string_x = int(temp_string_x.split(".")[0])
+            temp_string_y = str(self.sprite.y / self.data.tile_size)
+            temp_string_y = int(temp_string_y.split(".")[0])
+            touple_coord = (temp_string_x, temp_string_y)
+            self.desired_path = Pathfinding(touple_coord, (int(player_location.x / self.data.tile_size), int(player_location.y / self.data.tile_size)), self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
 
-        temp_string_x = str(self.sprite.x / self.data.tile_size)
-        temp_string_x = int(temp_string_x.split(".")[0])
-        temp_string_y = str(self.sprite.y / self.data.tile_size)
-        temp_string_y = int(temp_string_y.split(".")[0])
-        touple_coord = (temp_string_x, temp_string_y)
-        self.desired_path = Pathfinding(
-            (touple_coord, int(self.sprite.y / self.data.tile_size)),
-            (int(player_location.x / self.data.tile_size), int(player_location.y / self.data.tile_size)),
-            self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
+            self.goto_x = len(self.desired_path) + (self.current_index * 2)
+            self.goto_y = len(self.desired_path) + self.current_index
+            self.goto_x = self.goto_x * 64
+            self.goto_y = self.goto_y * 64
+            # Debugging purposes
+            print(str(self.goto_x))
+            print(str(self.goto_y))
 
-        #print(str(self.desired_path))
-        self.goto_x = len(self.desired_path) + (self.current_index * 2)
-        self.goto_y = len(self.desired_path) + self.current_index
-        self.goto_x = self.goto_x * 64
-        self.goto_y = self.goto_y * 64
-        # Debugging purposes
-        print(str(self.goto_x))
-        print(str(self.goto_y))
+            if abs(int(self.goto_x) - int(self.sprite.x)) == 0 or abs(int(self.goto_y) - int(self.sprite.y)) == 0:
+                pass
+            else:
+                if self.goto_x > self.sprite.x:
+                    self.velocity.x = 1
+                elif self.goto_x < self.sprite.x:
+                    self.velocity.x = -1
+                if self.goto_y > self.sprite.y:
+                    self.velocity.y = 1
+                elif self.goto_y < self.sprite.y:
+                    self.velocity.y = -1
+                delta_x = self.enemy_speed * self.velocity.x * game_time.fixed_timestep
+                delta_y = self.enemy_speed * self.velocity.y * game_time.fixed_timestep
 
-        if abs(int(self.goto_x) - int(self.sprite.x)) < 2:
-            Pathfinding.pop(-1)
-        elif self.goto_x > self.sprite.x:
-            self.velocity.x = 1
-        elif self.goto_x < self.sprite.x:
-            self.velocity.x = -1
-
-        if abs(int(self.goto_y) - int(self.sprite.y)) < 2:
-            Pathfinding.pop(-2)
-        elif self.goto_y > self.sprite.y:
-            self.velocity.y = 1
-        elif self.goto_y < self.sprite.y:
-            self.velocity.y = -1
-
-        delta_x = self.enemy_speed * self.velocity.x * game_time.fixed_timestep
-        delta_y = self.enemy_speed * self.velocity.y * game_time.fixed_timestep
-
-        self.sprite.x = self.sprite.x * delta_x
-        self.sprite.y = self.sprite.y * delta_y
+                self.sprite.x = self.sprite.x + delta_x
+                self.sprite.y = self.sprite.y + delta_y
 
         ## Checks if enemy sprite touches player sprite
         if abs(int(player_location.x) - int(self.sprite.x)) < 2 or abs(int(player_location.y) - int(self.sprite.y)) < 2:

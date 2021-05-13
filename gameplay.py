@@ -184,3 +184,4 @@ class GamePlay(GameState):
             self.data.renderer.render(enemy.sprite)
         for gem in self.gemsArray:
             self.data.renderer.render(gem.sprite)
+        self.data.renderer.render(self.enemy.sprite)
