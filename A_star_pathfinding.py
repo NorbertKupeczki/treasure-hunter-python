@@ -101,7 +101,7 @@ class Pathfinding:
 
         closed_List = []
 
-        while len(open_List) is not 0:
+        while len(open_List) != 0:
 
             current_node = self.lowest_node(open_List, goal)
 
