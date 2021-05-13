@@ -45,7 +45,7 @@ class Pathfinding:
 
     def lowest_node(self, list, goal):
 
-        smallest = 1000000
+        smallest = 100000000000000000000000
 
         for i in range(len(list)):
 
@@ -149,3 +149,7 @@ class Pathfinding:
 
 
         return False
+
+    def pop(self):
+        value = self.decided_path.pop()
+        return value
