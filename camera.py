@@ -29,5 +29,3 @@ class Camera:
         self.camera.lookAt(pyasge.Point2D(camera_x, camera_y))
 
         return pyasge.Point2D(self.camera.view.min_x, self.camera.view.min_y)
-
-

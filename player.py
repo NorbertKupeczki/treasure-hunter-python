@@ -36,25 +36,29 @@ class Player:
         self.projectiles.update_projectiles(game_time)
 
     def move_player(self, game_time: pyasge.GameTime, keys, game_pad):
-        if keys[pyasge.KEYS.KEY_W]:
-            self.velocity.y = -1
-        elif keys[pyasge.KEYS.KEY_S]:
-            self.velocity.y = 1
-        else:
-            self.velocity.y = 0
-
-        if keys[pyasge.KEYS.KEY_A]:
-            self.velocity.x = -1
-        elif keys[pyasge.KEYS.KEY_D]:
-            self.velocity.x = 1
-        else:
-            self.velocity.x = 0
-
         if game_pad.connected and self.game_pad_enabled:
             if abs(game_pad.x) > self.game_pad_sensitivity:
                 self.velocity.x = game_pad.x
+            else:
+                self.velocity.x = 0
             if abs(game_pad.y) > self.game_pad_sensitivity:
                 self.velocity.y = game_pad.y
+            else:
+                self.velocity.y = 0
+        else:
+            if keys[pyasge.KEYS.KEY_W]:
+                self.velocity.y = -1
+            elif keys[pyasge.KEYS.KEY_S]:
+                self.velocity.y = 1
+            else:
+                self.velocity.y = 0
+
+            if keys[pyasge.KEYS.KEY_A]:
+                self.velocity.x = -1
+            elif keys[pyasge.KEYS.KEY_D]:
+                self.velocity.x = 1
+            else:
+                self.velocity.x = 0
 
         if self.velocity.x != 0 or self.velocity.y != 0:
             animation_speed = math.sqrt(pow(self.velocity.x, 2) + pow(self.velocity.y, 2))

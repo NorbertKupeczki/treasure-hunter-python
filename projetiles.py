@@ -1,5 +1,6 @@
 import pyasge
 from bullet import Bullet
+from gem import Gem
 
 
 class Projectiles:
@@ -19,6 +20,19 @@ class Projectiles:
                 if self.check_collision(bullet.centre(), enemy.sprite):
                     self.data.enemies.remove(enemy)
                     self.projectiles.remove(bullet)
+
+            for vase in self.data.breakables:
+                if self.check_collision(bullet.centre(), vase.sprite) and vase.hp > 0:
+                    vase.hp -= 1
+                    print(vase.hp)
+                    vase.update()
+                    if vase.hp <= 0:
+                        self.projectiles.remove(bullet)
+                        x = int(vase.sprite.x / self.data.tile_size)
+                        y = int(vase.sprite.y / self.data.tile_size)
+                        self.data.map.cost_map[int(y)][int(x)] = 1
+                        self.data.gems.append(Gem(pyasge.Point2D((x + 0.5) * self.data.tile_size,
+                                                                 (y + 0.5) * self.data.tile_size)))
 
             if not self.is_passable(bullet.centre()):
                 self.projectiles.remove(bullet)
