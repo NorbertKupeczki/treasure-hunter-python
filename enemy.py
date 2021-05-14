@@ -4,11 +4,12 @@ from damagestates import DamageStates
 from A_star_pathfinding import Pathfinding
 import math
 
+from enemyMain import EnemyMain
 from player import Player
 from projetiles import Projectiles
 
 
-class Enemy:
+class Enemy(EnemyMain):
     def __init__(self, data, start_pos: pyasge.Point2D) -> None:
 
         # Filenames for each damage state zombie enemy can have
@@ -41,7 +42,7 @@ class Enemy:
         self.current_condition = DamageStates.HEALTHY
         self.previous_condition = DamageStates.HEALTHY
         self.old_player_pos = pyasge.Point2D(0, 0)
-        # self.projectiles = Projectiles()
+
 
     def update(self, game_time: pyasge.GameTime, player_location: pyasge.Point2D):
         self.fsm.update()
@@ -51,23 +52,15 @@ class Enemy:
             self.redraw()
             self.previous_condition = self.current_condition
 
-    def move_enemy(self, game_time: pyasge.GameTime, player_location: pyasge.Point2D, player_location_tile: pyasge.Point2D):
 
-        # print(str(abs(int(player_location.x) - int(self.sprite.x))))
-        # if abs(int(player_location.x) - int(self.sprite.x)) < 400 and abs(
-        #         int(player_location.y) - int(self.sprite.y)) < 400:
-        #     self.primitivePathfinding(game_time, player_location)
-        # # Checks if enemy sprite touches player sprite
-        # if abs(int(player_location.x) - int(self.sprite.x)) < \
-        #         2 or abs(int(player_location.y) - int(self.sprite.y)) < 2:
-        #     pass
+    def move_enemy(self, game_time: pyasge.GameTime, player_location: pyasge.Point2D, player_location_tile: pyasge.Point2D):
 
         enemy_curr_tile_cord = (int(((self.sprite.x + self.sprite.width * 0.5) / self.data.tile_size)),  # 35
                                 int((self.sprite.y + self.sprite.height * 0.5) / self.data.tile_size))   # 60
 
 
 
-        distance = self.heuristic(player_location_tile.x, player_location_tile.y, enemy_curr_tile_cord)    # get the distance of the player
+        distance = EnemyMain.distanceToPlayer(self,player_location_tile.x, player_location_tile.y, enemy_curr_tile_cord)    # get the distance of the player
 
         if distance < 5: # if the player is close enoguh then
 
@@ -131,78 +124,6 @@ class Enemy:
 
 
 
-    # def primitivePathfinding(self, game_time, player_location):
-    #     if abs(int(player_location.x) - int(self.sprite.x)) < 2:
-    #         self.velocity.x = 0
-    #     elif player_location.x > self.sprite.x:
-    #         self.velocity.x = 1
-    #     elif player_location.x < self.sprite.x:
-    #         self.velocity.x = -1
-    #
-    #     if abs(int(player_location.y) - int(self.sprite.y)) < 2:
-    #         self.velocity.y = 0
-    #     elif player_location.y > self.sprite.y:
-    #         self.velocity.y = 1
-    #     elif player_location.y < self.sprite.y:
-    #         self.velocity.y = -1
-    #
-    #     delta_x = self.enemy_speed * self.velocity.x * game_time.fixed_timestep
-    #     delta_y = self.enemy_speed * self.velocity.y * game_time.fixed_timestep
-    #     # delta_xy = self.check_collision(delta_x, delta_y) <-- Temporary disabled
-    #
-    #     self.sprite.x = self.sprite.x + delta_x
-    #     self.sprite.y = self.sprite.y + delta_y
-
-    # def aStarPathfinding(self, game_time, player_location):
-    #
-    #     pass
-    #
-
-        # temp_string_x = str(self.sprite.x / self.data.tile_size)
-        # temp_string_x = int(temp_string_x.split(".")[0])
-        # temp_string_y = str(self.sprite.y / self.data.tile_size)
-        # temp_string_y = int(temp_string_y.split(".")[0])
-        # touple_coord = (temp_string_x, temp_string_y)
-
-        # self.desired_path = Pathfinding(touple_coord, (
-        # int(player_location.x / self.data.tile_size), int(player_location.y / self.data.tile_size)),
-        #                                 self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
-        #
-        # self.goto_x = len(self.desired_path) + (self.current_index * 2)
-        # self.goto_y = len(self.desired_path) + self.current_index
-        # self.goto_x = self.goto_x * self.data.tile_size
-        # self.goto_y = self.goto_y * self.data.tile_size
-        # self.desired_path.clear()
-
-        # # Debugging purposes
-        # print(str(self.goto_x) + "= goto x")
-        # print(str(self.goto_y) + "= goto y")
-        # print(str(player_location.x) + "= player x")
-        # print(str(player_location.y) + "= player y")
-        # print(str(self.sprite.x) + "= sprite x")
-        # print(str(self.sprite.y) + "= sprite y")
-        #
-
-
-        # if abs(int(self.goto_x) - int(self.sprite.x)) < 2:
-        #     self.velocity.x = 0
-        # elif abs(int(self.goto_y) - int(self.sprite.y)) < 2:
-        #     self.velocity.y = 0
-        # else:
-        #     if self.goto_x > self.sprite.x:
-        #         self.velocity.x = 1
-        #     elif self.goto_x < self.sprite.x:
-        #         self.velocity.x = -1
-        #     if self.goto_y > self.sprite.y:
-        #         self.velocity.y = 1
-        #     elif self.goto_y < self.sprite.y:
-        #         self.velocity.y = -1
-        #     delta_x = self.enemy_speed * self.velocity.x * game_time.fixed_timestep
-        #     delta_y = self.enemy_speed * self.velocity.y * game_time.fixed_timestep
-        #
-        #     self.sprite.x = self.sprite.x + delta_x
-        #     self.sprite.y = self.sprite.y + delta_y
-
     def redraw(self):
         if self.current_condition < DamageStates.DEAD:
             if self.current_condition == DamageStates.HEALTHY:
@@ -238,10 +159,10 @@ class Enemy:
 
     def update_dead(self):
         self.current_condition = DamageStates.DEAD
-
-    def heuristic(self, x, y, enemy_tile):  #distance from the player in tile form
-
-        dx = abs(x - enemy_tile[0])
-        dy = abs(y - enemy_tile[1])
-
-        return math.sqrt(dx * dx + dy * dy)
+    #
+    # def heuristic(self, x, y, enemy_tile):  #distance from the player in tile form
+    #
+    #     dx = abs(x - enemy_tile[0])
+    #     dy = abs(y - enemy_tile[1])
+    #
+    #     return math.sqrt(dx * dx + dy * dy)

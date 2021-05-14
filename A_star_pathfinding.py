@@ -45,7 +45,7 @@ class Pathfinding:
 
     def lowest_node(self, list, goal):
 
-        smallest = 100000000000000000000000
+        smallest = 1000000000000000
 
         for i in range(len(list)):
 
