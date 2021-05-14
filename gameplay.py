@@ -23,7 +23,7 @@ class GamePlay(GameState):
         self.data.gems = []
         self.data.enemies = []
         self.data.breakables = []
-        self.load_map(self.data.level_selected)
+        self.load_game_map(self.data.level_selected)
 
         # initialising HUD and the player
         self.hud = HUD(data)
@@ -48,14 +48,14 @@ class GamePlay(GameState):
             pyasge.KEYS.KEY_SPACE: False,
             pyasge.KEYS.KEY_G: False,
             pyasge.KEYS.KEY_C: False,
-            pyasge.KEYS.KEY_1: False,
-            pyasge.KEYS.KEY_2: False,
             pyasge.KEYS.KEY_ESCAPE: False,
+            pyasge.KEYS.KEY_Q: False,  # To test player health system
+            pyasge.KEYS.KEY_E: False  # To test player health system
         }
 
         self.game_pad = self.data.inputs.getGamePad(0)
 
-    def load_map(self, level_num) -> None:
+    def load_game_map(self, level_num) -> None:
         self.data.map = Map(str(level_num))
 
         for gem in self.data.map.layers[2].tiles:
@@ -99,6 +99,17 @@ class GamePlay(GameState):
         if self.keys[pyasge.KEYS.KEY_C]:
             if event.action is pyasge.KEYS.KEY_PRESSED:
                 self.hud.coords_on = not self.hud.coords_on
+                
+        # To test player health system
+        if self.keys[pyasge.KEYS.KEY_Q]:
+            if event.action is pyasge.KEYS.KEY_PRESSED:
+                self.player.health -= 1
+                self.hud.health_bar.lose_health(self.player.health)
+
+        if self.keys[pyasge.KEYS.KEY_E]:
+            if event.action is pyasge.KEYS.KEY_PRESSED:
+                self.player.health = 5
+                self.hud.health_bar.heal()
 
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
 
@@ -141,10 +152,8 @@ class GamePlay(GameState):
 
         if self.keys[pyasge.KEYS.KEY_ESCAPE]:
             return GameStateID.EXIT
-        elif self.keys[pyasge.KEYS.KEY_1]:
+        elif self.player.health <= 0:
             return GameStateID.GAME_OVER
-        elif self.keys[pyasge.KEYS.KEY_2]:
-            return GameStateID.WINNER_WINNER
         else:
             return GameStateID.GAMEPLAY
 
@@ -161,11 +170,6 @@ class GamePlay(GameState):
             self.data.renderer.render(enemy.sprite)
         for projectile in self.data.enemy_projectiles.projectiles:
             self.data.renderer.render(projectile.sprite)
-
-        # for enemyR in self.data.enemiesRange:
-        #     self.data.renderer.render(enemyR.sprite)
-        #     enemyR.render_bullets(self.data.renderer)
-
         for gem in self.data.gems:
             self.data.renderer.render(gem.sprite)
         for vase in self.data.breakables:

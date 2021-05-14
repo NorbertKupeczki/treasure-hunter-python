@@ -1,9 +1,13 @@
 import pyasge
+from healthbar import HealthBar
 
 
 class HUD:
     def __init__(self, data):
         self.data = data
+
+        self.health_bar = HealthBar(data)
+
         self.ui_text = pyasge.Text(self.data.fonts['main_text'], "DEMO")
         self.ui_text.colour = pyasge.COLOURS.RED
         self.ui_text.z_order = 5
@@ -16,7 +20,7 @@ class HUD:
         self.tile_coordinates.colour = pyasge.COLOURS.LIME
         self.tile_coordinates.z_order = 5
 
-        self.score = pyasge.Text(self.data.fonts['hud_text'], "Score: 0")  # <-- scoring system to be added - Norbert
+        self.score = pyasge.Text(self.data.fonts['hud_text'], "Score: "+str(self.data.score))
         self.score.colour = pyasge.COLOURS.LIME
         self.score.z_order = 5
 
@@ -36,6 +40,7 @@ class HUD:
             self.data.renderer.render(self.world_coordinates)
         self.data.renderer.render(self.ui_text)
         self.data.renderer.render(self.score)
+        self.health_bar.render_health_bar(self.data.renderer, corner)
 
     def update_score(self, score: int):
         self.score.string = "Score: "+str(score)

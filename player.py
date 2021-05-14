@@ -29,6 +29,7 @@ class Player:
         self.RELOAD_TIME = 0.5
         self.reload_time = self.RELOAD_TIME
         self.elapsed_time = 0.0
+        self.health = 5
 
     def update(self, game_time: pyasge.GameTime):
         if self.reload_time < self.RELOAD_TIME:
