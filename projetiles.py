@@ -14,7 +14,7 @@ class Projectiles:
     def zombie_shoot(self, spawn: pyasge.Point2D, direction: pyasge.Point2D):
         self.projectiles.append(Bullet(spawn, direction, 'enemy'))
 
-    def update_projectiles(self, game_time: pyasge.GameTime):
+    def update_projectiles(self, game_time: pyasge.GameTime, player):
         for bullet in self.projectiles:
             bullet.sprite.x = bullet.sprite.x + bullet.speed * bullet.velocity.x * game_time.fixed_timestep
             bullet.sprite.y = bullet.sprite.y + bullet.speed * bullet.velocity.y * game_time.fixed_timestep
@@ -38,6 +38,10 @@ class Projectiles:
                             self.data.map.cost_map[int(y)][int(x)] = 1
                             self.data.gems.append(Gem(pyasge.Point2D((x + 0.5) * self.data.tile_size,
                                                                      (y + 0.5) * self.data.tile_size)))
+            elif bullet.bullet_type == BulletType.Enemy:
+                if self.check_collision(bullet.centre(), player.sprite):
+                    self.projectiles.remove(bullet)
+                    return True
 
             if not self.is_passable(bullet.centre()):
                 self.projectiles.remove(bullet)

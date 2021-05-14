@@ -99,7 +99,7 @@ class GamePlay(GameState):
         if self.keys[pyasge.KEYS.KEY_C]:
             if event.action is pyasge.KEYS.KEY_PRESSED:
                 self.hud.coords_on = not self.hud.coords_on
-                
+
         # To test player health system
         if self.keys[pyasge.KEYS.KEY_Q]:
             if event.action is pyasge.KEYS.KEY_PRESSED:
@@ -117,13 +117,24 @@ class GamePlay(GameState):
             item.update(game_time)
 
         self.player.move_player(game_time, self.keys, self.game_pad)
-
+        """
+        Updating the enemy array
+        """
         for enemy in self.data.enemies:
             enemy.move_enemy(game_time, pyasge.Point2D(self.data.world_loc.x, self.data.world_loc.y),
                              pyasge.Point2D(self.data.tile_loc.x, self.data.tile_loc.y))
-
-        self.data.enemy_projectiles.update_projectiles(game_time)
-
+        """
+        Updating enemy projectiles, if the function returns True,
+        the player loses 1 HP and the health bar gets updated
+        """
+        if self.data.enemy_projectiles.update_projectiles(game_time, self.player):
+            self.player.health -= 1
+            self.hud.health_bar.lose_health(self.player.health)
+        """
+        Updating the gems, if all the gems are collected, the exit door opens
+        If the player is close enough to the exit door, the game goes to the next level screen
+        If the player was on the last level, the game goes to the win screen
+        """
         if self.data.gems:
             for gem in self.data.gems:
                 if gem.check_collision(self.player.sprite):

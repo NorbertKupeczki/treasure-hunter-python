@@ -35,7 +35,7 @@ class Player:
         if self.reload_time < self.RELOAD_TIME:
             self.reload_time += game_time.fixed_timestep
 
-        self.projectiles.update_projectiles(game_time)
+        self.projectiles.update_projectiles(game_time, self)
 
     def move_player(self, game_time: pyasge.GameTime, keys, game_pad):
         if game_pad.connected and self.game_pad_enabled:
