@@ -7,6 +7,8 @@ import math
 from projetiles import Projectiles
 
 
+
+#i need to check on the side collisions
 class EnemyR:
     def __init__(self, data, start_pos: pyasge.Point2D) -> None:
 
@@ -18,7 +20,6 @@ class EnemyR:
 
         self.sprite = pyasge.Sprite()
         self.sprite.loadTexture(self.states[0])
-        # self.sprite.scale = 0.35
 
         self.data = data  # data of the game
 
@@ -50,28 +51,19 @@ class EnemyR:
             self.redraw()
             self.previous_condition = self.current_condition
 
-    def move_enemy(self, game_time: pyasge.GameTime, player_location: pyasge.Point2D,
-                   player_location_tile: pyasge.Point2D):
+    def move_enemy(self, game_time: pyasge.GameTime, player_location: pyasge.Point2D,player_location_tile: pyasge.Point2D):
 
         if self.reload is False:
             self.timer -= game_time.fixed_timestep
             if self.timer < 0:
                 self.reload = True
 
-        # temp_string_x = str((self.sprite.x + 35) / self.data.tile_size)
-        # temp_string_x = int(temp_string_x.split(".")[0])
-        # temp_string_y = str((self.sprite.y + 60) / self.data.tile_size)
-        # temp_string_y = int(temp_string_y.split(".")[0])
-        # enemy_curr_tile_cord = (temp_string_x, temp_string_y)
-        """
-        The below calculation is the same as above, just shorter - Norbert
-        """
-        enemy_curr_tile_cord = (int(((self.sprite.x + self.sprite.width * 0.5) / self.data.tile_size)),  # 35
-                                int((self.sprite.y + self.sprite.height * 0.5) / self.data.tile_size))   # 60
+        enemy_curr_tile_cord = (int(((self.sprite.x + self.sprite.width * 0.5) / self.data.tile_size)),
+                                int((self.sprite.y + self.sprite.height * 0.5) / self.data.tile_size))
 
         distance = self.heuristic(player_location_tile.x, player_location_tile.y, enemy_curr_tile_cord)
 
-        if distance < 5.5:
+        if distance < 8:
             curr_pos_prev = (self.sprite.x, self.sprite.y)
 
             player_pos = player_location
@@ -87,7 +79,6 @@ class EnemyR:
 
                     if self.data.map.cost_map[int(enemy_curr_tile_cord[1]) + 1][int(enemy_curr_tile_cord[0])] < 1000:  # go to the bottom
                         self.desired_path = Pathfinding(enemy_curr_tile_cord, (int(enemy_curr_tile_cord[0]), int(enemy_curr_tile_cord[1]) + 1), self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
-
                         self.facing = pyasge.Point2D(0, -1)
 
                     elif self.data.map.cost_map[int(enemy_curr_tile_cord[1]) - 1][int(enemy_curr_tile_cord[0])] < 1000:  # go to the top
@@ -111,14 +102,12 @@ class EnemyR:
                         goal_tile = self.tile_check(player_location_tile.x, player_location_tile.y, relation)
                         self.desired_path.clear()
 
-                        self.desired_path = Pathfinding(enemy_curr_tile_cord,(int(goal_tile[0]), int(goal_tile[1])),self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
+                        self.desired_path = Pathfinding(enemy_curr_tile_cord, (int(goal_tile[0]), int(goal_tile[1])), self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
 
                         self.desired_path.pop()
 
-            else:
-                pass
 
-            if len(self.desired_path) > 0:
+            if len(self.desired_path) > 0:    # goes to the position designated
 
                 player_pos.y = int(self.desired_path[len(self.desired_path) - 1].tile[1] * self.data.tile_size)
                 player_pos.x = int(self.desired_path[len(self.desired_path) - 1].tile[0] * self.data.tile_size)
@@ -151,17 +140,10 @@ class EnemyR:
                 if curr_pos_new == curr_pos_prev:
                     self.desired_path.pop()
 
-            else:
-                if self.reload is True:
-                    self.shoot()
-                    self.timer = 1
-                    self.reload = False
-                    self.desired_path.clear()
 
     def side_check(self, main_x_pos, main_y_pos, square_x, square_y, square_width, rh):
 
         side_touched = 0
-        # the zmobie is on the .... of the player meaning
 
         if main_x_pos < square_x:  # left
             side_touched = 4
@@ -257,7 +239,7 @@ class EnemyR:
         for bullets in self.projectiles.projectiles:
             renderer.render(bullets.sprite)
 
-    def heuristic(self, x, y, enemy_tile):  #distance from the player
+    def heuristic(self, x, y, enemy_tile):  #distance from the player in tile form
 
         dx = abs(x - enemy_tile[0])
         dy = abs(y - enemy_tile[1])

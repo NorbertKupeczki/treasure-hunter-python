@@ -181,6 +181,7 @@ class GamePlay(GameState):
             self.data.renderer.render(enemy.sprite)
         for projectile in self.data.enemy_projectiles.projectiles:
             self.data.renderer.render(projectile.sprite)
+
         for gem in self.data.gems:
             self.data.renderer.render(gem.sprite)
         for vase in self.data.breakables:
