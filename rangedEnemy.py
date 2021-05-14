@@ -1,77 +1,42 @@
 import pyasge
-from fsm import FSM
-from damagestates import DamageStates
 from A_star_pathfinding import Pathfinding
-import math
+from enemyMain import EnemyMain
 
 from projetiles import Projectiles
 
+class EnemyR(EnemyMain):
+    def __init__(self, data, start_pos: pyasge.Point2D, Range, health, speed) -> None:
+        super().__init__(data, start_pos, Range, health, speed)
 
-
-#i need to check on the side collisions
-class EnemyR:
-    def __init__(self, data, start_pos: pyasge.Point2D) -> None:
-
-        self.states = ["/data/images/character_zombie_dead.png",
-                       "/data/images/character_zombie_damaged.png",
-                       "/data/images/character_zombie_verydamaged.png",
-                       "/data/images/character_zombie_neardead.png",
-                       "/data/images/character_zombie_healthy.png"]
-
-        self.sprite = pyasge.Sprite()
-        self.sprite.loadTexture(self.states[0])
-
-        self.data = data  # data of the game
-
-        self.sprite.x = start_pos.x  # starting pos
-        self.sprite.y = start_pos.y
-
-        self.desired_path = []  # pathfinding stuff
-
-        self.enemy_speed = 60  # movement things
-        self.velocity = pyasge.Point2D()
-        self.facing = pyasge.Point2D(0, 1)
-
-        self.hp = 10  # state machine stuff
-        self.fsm = FSM()
-        self.fsm.setstate(self.update_healthy)
-        self.current_condition = DamageStates.HEALTHY
-        self.previous_condition = DamageStates.HEALTHY
         self.projectiles = Projectiles(self.data)
 
         self.reload = True
         self.timer = 1.0
 
-        self.old_player_pos = pyasge.Point2D(0, 0)
-
-    def update(self):
-        self.fsm.update()
-
-        if self.current_condition != self.previous_condition:
-            self.redraw()
-            self.previous_condition = self.current_condition
 
     def move_enemy(self, game_time: pyasge.GameTime, player_location: pyasge.Point2D,player_location_tile: pyasge.Point2D):
+
 
         if self.reload is False:
             self.timer -= game_time.fixed_timestep
             if self.timer < 0:
                 self.reload = True
 
+
         enemy_curr_tile_cord = (int(((self.sprite.x + self.sprite.width * 0.5) / self.data.tile_size)),
                                 int((self.sprite.y + self.sprite.height * 0.5) / self.data.tile_size))
 
-        distance = self.heuristic(player_location_tile.x, player_location_tile.y, enemy_curr_tile_cord)
+        distance = EnemyMain.distanceToPlayer(self, player_location_tile.x, player_location_tile.y, enemy_curr_tile_cord) # this si inhertied
 
-        if distance < 8:
+        if distance < self.range:
             curr_pos_prev = (self.sprite.x, self.sprite.y)
-
             player_pos = player_location
 
             if int(self.old_player_pos.x) != int(player_location_tile.x) or int(self.old_player_pos.y) != int(player_location_tile.y):
 
                 self.desired_path.clear()
                 self.old_player_pos = player_location_tile
+
 
                 if int(enemy_curr_tile_cord[0]) == int(player_location_tile.x) and int(enemy_curr_tile_cord[1]) == int(player_location_tile.y):
 
@@ -99,7 +64,9 @@ class EnemyR:
                     relation = self.side_check(self.sprite.x, self.sprite.y, player_pos.x, player_pos.y, 46, 62)
 
                     if relation != 0:
+
                         goal_tile = self.tile_check(player_location_tile.x, player_location_tile.y, relation)
+
                         self.desired_path.clear()
 
                         self.desired_path = Pathfinding(enemy_curr_tile_cord, (int(goal_tile[0]), int(goal_tile[1])), self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
@@ -107,7 +74,7 @@ class EnemyR:
                         self.desired_path.pop()
 
 
-            if len(self.desired_path) > 0:    # goes to the position designated
+            if len(self.desired_path) > 0:
 
                 player_pos.y = int(self.desired_path[len(self.desired_path) - 1].tile[1] * self.data.tile_size)
                 player_pos.x = int(self.desired_path[len(self.desired_path) - 1].tile[0] * self.data.tile_size)
@@ -139,7 +106,12 @@ class EnemyR:
 
                 if curr_pos_new == curr_pos_prev:
                     self.desired_path.pop()
-
+            else:
+                if self.reload is True:
+                    self.shoot()
+                    self.timer = 1
+                    self.reload = False
+                    self.desired_path.clear()
 
     def side_check(self, main_x_pos, main_y_pos, square_x, square_y, square_width, rh):
 
@@ -199,49 +171,8 @@ class EnemyR:
 
         return player_saved_tile
 
-    def redraw(self):
-        if self.current_condition < DamageStates.DEAD:
-            if self.current_condition == DamageStates.HEALTHY:
-                self.sprite.loadTexture(self.states[0])
-            elif self.current_condition == DamageStates.DAMAGED:
-                self.sprite.loadTexture(self.states[1])
-            elif self.current_condition == DamageStates.VERY_DAMAGED:
-                self.sprite.loadTexture(self.states[2])
-            elif self.current_condition == DamageStates.NEAR_DEAD:
-                self.sprite.loadTexture(self.states[3])
-        else:
-            self.sprite.loadTexture(self.states[4])
-
-    def update_healthy(self):
-        self.current_condition = DamageStates.HEALTHY
-        if self.hp <= 7:
-            self.fsm.setstate(self.update_damaged)
-
-    def update_damaged(self):
-        self.current_condition = DamageStates.DAMAGED
-        if self.hp <= 4:
-            self.fsm.setstate(self.update_damaged)
-
-    def update_verydamaged(self):
-        self.current_condition = DamageStates.VERY_DAMAGED
-        if self.hp <= 2:
-            self.fsm.setstate(self.update_damaged)
-
-    def update_neardead(self):
-        self.current_condition = DamageStates.NEAR_DEAD
-        if self.hp <= 0:
-            self.fsm.setstate(self.update_damaged)
-
-    def update_dead(self):
-        self.current_condition = DamageStates.DEAD
-
     def render_bullets(self, renderer):
         for bullets in self.projectiles.projectiles:
             renderer.render(bullets.sprite)
 
-    def heuristic(self, x, y, enemy_tile):  #distance from the player in tile form
 
-        dx = abs(x - enemy_tile[0])
-        dy = abs(y - enemy_tile[1])
-
-        return math.sqrt(dx * dx + dy * dy)

@@ -59,19 +59,16 @@ class GamePlay(GameState):
         self.data.map = Map(str(level_num))
 
         for gem in self.data.map.layers[2].tiles:
-            self.data.gems.append(Gem(pyasge.Point2D((gem.coordinate[0] + 0.5) * self.data.tile_size,
-                                                     (gem.coordinate[1] + 0.5) * self.data.tile_size)))
+            self.data.gems.append(Gem(pyasge.Point2D((gem.coordinate[0] + 0.5) * self.data.tile_size,(gem.coordinate[1] + 0.5) * self.data.tile_size)))
 
         ranged_enemy_counter = 0
         for enemy in self.data.map.layers[3].tiles:
             ranged_enemy_counter += 1
             if ranged_enemy_counter == 3:
-                self.data.enemies.append(EnemyR(self.data, pyasge.Point2D(enemy.coordinate[0] * self.data.tile_size,
-                                                                          enemy.coordinate[1] * self.data.tile_size)))
+                self.data.enemies.append(EnemyR(self.data, pyasge.Point2D(enemy.coordinate[0] * self.data.tile_size,enemy.coordinate[1] * self.data.tile_size), 8, 10, 80))   # the 3 numbers at the end mean the range of vision range, the health, the speed
                 ranged_enemy_counter = 0
             else:
-                self.data.enemies.append(Enemy(self.data, pyasge.Point2D(enemy.coordinate[0] * self.data.tile_size,
-                                                                         enemy.coordinate[1] * self.data.tile_size)))
+                self.data.enemies.append(Enemy(self.data, pyasge.Point2D(enemy.coordinate[0] * self.data.tile_size, enemy.coordinate[1] * self.data.tile_size), 5, 10,60 ))
 
         for breakable in self.data.map.layers[4].tiles:
             self.data.breakables.append(Vase(pyasge.Point2D(breakable.coordinate[0] * self.data.tile_size,
@@ -121,8 +118,8 @@ class GamePlay(GameState):
         Updating the enemy array
         """
         for enemy in self.data.enemies:
-            enemy.move_enemy(game_time, pyasge.Point2D(self.data.world_loc.x, self.data.world_loc.y),
-                             pyasge.Point2D(self.data.tile_loc.x, self.data.tile_loc.y))
+            enemy.move_enemy(game_time, pyasge.Point2D(self.data.world_loc.x, self.data.world_loc.y), pyasge.Point2D(self.data.tile_loc.x, self.data.tile_loc.y))
+            enemy.update() # call the update function to change texture
         """
         Updating enemy projectiles, if the function returns True,
         the player loses 1 HP and the health bar gets updated
