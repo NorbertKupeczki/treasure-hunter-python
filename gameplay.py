@@ -121,8 +121,7 @@ class GamePlay(GameState):
                 self.hud.health_bar.heal()
 
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
-        print(str(self.canbehit))
-
+        
         if self.canbehit == False:
             self.iframes -= game_time.fixed_timestep
             if self.iframes < 0:
@@ -148,9 +147,7 @@ class GamePlay(GameState):
             enemy.update() # call the update function to change texture
             if self.canbehit:
                 if enemy.playerZombieCollision(pyasge.Point2D(self.data.tile_loc.x, self.data.tile_loc.y)):
-                    self.canbehit = False
-                    self.player.health -= 1
-                    self.hud.health_bar.lose_health(self.player.health)
+                    self.receivedDamage()
 
         for x in range(len(self.data.enemies)):
             saved = x
@@ -165,9 +162,7 @@ class GamePlay(GameState):
         """
         if self.canbehit:
             if self.data.enemy_projectiles.update_projectiles(game_time, self.player):
-                self.canbehit = False
-                self.player.health -= 1
-                self.hud.health_bar.lose_health(self.player.health)
+                self.receivedDamage()
         """
         Updating the gems, if all the gems are collected, the exit door opens
         If the player is close enough to the exit door, the game goes to the next level screen
@@ -206,6 +201,11 @@ class GamePlay(GameState):
         else:
             return GameStateID.GAMEPLAY
 
+    def receivedDamage(self):
+        self.canbehit = False
+        self.player.health -= 1
+        self.hud.health_bar.lose_health(self.player.health)
+
     def render(self, game_time: pyasge.GameTime) -> None:
         corner = self.data.camera.look_at(self.player.get_sprite())
         self.data.renderer.setProjectionMatrix(self.data.camera.camera.view)
@@ -227,3 +227,4 @@ class GamePlay(GameState):
 
         for enemy in self.data.enemies:
             self.data.renderer.render(enemy.sprite)
+
