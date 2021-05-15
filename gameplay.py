@@ -12,6 +12,7 @@ from map import Map
 
 from gem import Gem
 from vase import Vase
+from medkit import Medkit
 
 
 class GamePlay(GameState):
@@ -24,6 +25,7 @@ class GamePlay(GameState):
         self.data.gems = []
         self.data.enemies = []
         self.data.breakables = []
+        self.gems_in_level = 0
         self.load_game_map(self.data.level_selected)
 
         # initialising HUD and the player
@@ -38,6 +40,7 @@ class GamePlay(GameState):
         self.entrance_door = Door(self.data.map.starting_location)
         self.exit_door = Door(self.data.map.end_location)
         self.update_list.append(self.exit_door)
+
 
         # register the key handler for this class
         self.data.inputs.addCallback(pyasge.EventType.E_KEY, self.input)
@@ -66,8 +69,15 @@ class GamePlay(GameState):
     def load_game_map(self, level_num) -> None:
         self.data.map = Map(str(level_num))
 
+        medkit_counter = 0
         for gem in self.data.map.layers[2].tiles:
-            self.data.gems.append(Gem(pyasge.Point2D((gem.coordinate[0] + 0.5) * self.data.tile_size,(gem.coordinate[1] + 0.5) * self.data.tile_size)))
+            medkit_counter += 1
+            if medkit_counter == 12:
+                self.data.gems.append(Medkit(pyasge.Point2D((gem.coordinate[0] + 0.5) * self.data.tile_size,(gem.coordinate[1] + 0.5) * self.data.tile_size)))
+                medkit_counter = 0
+            else:
+                self.data.gems.append(Gem(pyasge.Point2D((gem.coordinate[0] + 0.5) * self.data.tile_size,(gem.coordinate[1] + 0.5) * self.data.tile_size)))
+                self.gems_in_level += 1
 
         ranged_enemy_counter = 0
         for enemy in self.data.map.layers[3].tiles:
@@ -85,6 +95,8 @@ class GamePlay(GameState):
         for breakable in self.data.map.layers[4].tiles:
             self.data.breakables.append(Vase(pyasge.Point2D(breakable.coordinate[0] * self.data.tile_size,
                                                             breakable.coordinate[1] * self.data.tile_size)))
+            self.gems_in_level += 1
+
 
     def input(self, event: pyasge.KeyEvent) -> None:
         if event.action is not pyasge.KEYS.KEY_REPEATED:
@@ -121,6 +133,8 @@ class GamePlay(GameState):
                 self.hud.health_bar.heal()
 
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
+
+        # print(self.gems_in_level)
 
         if self.canbehit == False:
             self.iframes -= game_time.fixed_timestep
@@ -168,7 +182,7 @@ class GamePlay(GameState):
         If the player is close enough to the exit door, the game goes to the next level screen
         If the player was on the last level, the game goes to the win screen
         """
-        if self.data.gems:
+        if self.gems_in_level > 0:
             for gem in self.data.gems:
                 if gem.check_collision(self.player.sprite):
                     # gem_loc = pyasge.Point2D((gem.sprite.x + gem.sprite.width * 0.5) / self.data.tile_size - 0.5,
@@ -177,9 +191,16 @@ class GamePlay(GameState):
                     # for tile in self.data.map.layers[2].tiles:
                     #     if tile.coordinate[0] == int(gem_loc.x) and tile.coordinate[1] == int(gem_loc.y):
                     #         self.data.map.layers[2].tiles.remove(tile)
-                    self.data.score += gem.value
-                    self.hud.update_score(self.data.score)
-                    self.data.gems.remove(gem)
+                    if gem.id == 1:
+                        self.data.score += gem.value
+                        self.hud.update_score(self.data.score)
+                        self.data.gems.remove(gem)
+                        self.gems_in_level -= 1
+                        print(self.gems_in_level)
+                    if gem.id == 2:
+                        self.data.gems.remove(gem)
+                        self.player.health = 5
+                        self.hud.health_bar.heal()
         else:
             if not self.exit_door.door_open:
                 self.exit_door.door_open = True
@@ -222,9 +243,12 @@ class GamePlay(GameState):
 
         for gem in self.data.gems:
             self.data.renderer.render(gem.sprite)
+
         for vase in self.data.breakables:
             self.data.renderer.render(vase.sprite)
 
         for enemy in self.data.enemies:
             self.data.renderer.render(enemy.sprite)
+
+
 
