@@ -6,7 +6,7 @@ from enemy import Enemy
 from rangedEnemy import EnemyR
 from door import Door
 from hud import HUD
-from projetiles import Projectiles
+from projectiles import Projectiles
 
 from map import Map
 
@@ -83,10 +83,12 @@ class GamePlay(GameState):
         for enemy in self.data.map.layers[3].tiles:
             ranged_enemy_counter += 1
             if ranged_enemy_counter == 3:
-                self.data.enemies.append(EnemyR(self.data, pyasge.Point2D(enemy.coordinate[0] * self.data.tile_size,enemy.coordinate[1] * self.data.tile_size), 8, 10, 80))   # the 3 numbers at the end mean the range of vision range, the health, the speed
+                self.data.enemies.append(EnemyR(self.data, pyasge.Point2D(enemy.coordinate[0] * self.data.tile_size,enemy.coordinate[1] * self.data.tile_size),
+                                                8, 3, 80))   # the 3 numbers at the end mean the range of vision range, the health, the speed
                 ranged_enemy_counter = 0
             else:
-                self.data.enemies.append(Enemy(self.data, pyasge.Point2D(enemy.coordinate[0] * self.data.tile_size, enemy.coordinate[1] * self.data.tile_size), 5, 10, 60))
+                self.data.enemies.append(Enemy(self.data, pyasge.Point2D(enemy.coordinate[0] * self.data.tile_size, enemy.coordinate[1] * self.data.tile_size),
+                                               5, 5, 60))
 
         self.enemies_left = len(self.data.enemies)
 

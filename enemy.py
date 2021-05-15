@@ -6,8 +6,8 @@ from enemyMain import EnemyMain
 
 class Enemy(EnemyMain):
 
-    def __init__(self, data, start_pos: pyasge.Point2D, Range,health, speed) -> None:
-        super().__init__(data, start_pos, Range,health ,speed)
+    def __init__(self, data, start_pos: pyasge.Point2D, Range, health, speed) -> None:
+        super().__init__(data, start_pos, Range, health ,speed)
 
 
     def move_enemy(self, game_time: pyasge.GameTime, player_location: pyasge.Point2D, player_location_tile: pyasge.Point2D):

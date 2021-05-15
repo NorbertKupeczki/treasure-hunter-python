@@ -19,12 +19,14 @@ class Projectiles:
             bullet.sprite.x = bullet.sprite.x + bullet.speed * bullet.velocity.x * game_time.fixed_timestep
             bullet.sprite.y = bullet.sprite.y + bullet.speed * bullet.velocity.y * game_time.fixed_timestep
 
-            if bullet.bullet_type == BulletType.Player:
+            if bullet.bullet_type == BulletType.Player or bullet.bullet_type == BulletType.PowerUp:
 
                 for enemy in self.data.enemies:
                     if self.check_collision(bullet.centre(), enemy.sprite):
-                        self.data.enemies.remove(enemy)
+                        enemy.current_hp -= 1
                         self.projectiles.remove(bullet)
+                        if enemy.current_hp <= 0:
+                            self.data.enemies.remove(enemy)
 
                 for vase in self.data.breakables:
                     if self.check_collision(bullet.centre(), vase.sprite) and vase.hp > 0:

@@ -1,7 +1,7 @@
 import math
 import pyasge
 from fsm import FSM
-from damagestates import DamageStates
+from enum import IntEnum
 from A_star_pathfinding import Pathfinding
 
 
@@ -13,7 +13,7 @@ class EnemyMain:
 
         self.states = ["/data/images/character_zombie_healthy.png",
                        "/data/images/character_zombie_damaged.png",
-                       "/data/images/character_zombie_verydamaged.png",
+                       "data/images/character_zombie_verydamaged.png",
                        "/data/images/character_zombie_neardead.png",
                        "/data/images/character_zombie_dead.png"]
 
@@ -22,11 +22,13 @@ class EnemyMain:
 
         self.old_player_pos = pyasge.Point2D(0, 0)
 
-        self.hp = health  # state machine stuff
+        self.starting_hp = health
+        self.current_hp = health
+        self.hpPercentage = (self.current_hp / self.starting_hp) * 100
         self.fsm = FSM()
         self.fsm.setstate(self.update_healthy)
-        self.current_condition = DamageStates.HEALTHY
-        self.previous_condition = DamageStates.HEALTHY
+        self.current_enemy_condition = DamageStates.HEALTHY
+        self.previous_enemy_condition = DamageStates.HEALTHY
 
         self.velocity = pyasge.Point2D()
         self.facing = pyasge.Point2D(0, 1)
@@ -59,48 +61,39 @@ class EnemyMain:
             return False
 
     def update(self):
+        self.hpPercentage = (self.current_hp / self.starting_hp) * 100
         self.fsm.update()
 
-        if self.current_condition != self.previous_condition:
-
-            self.previous_condition = self.current_condition
+        if self.current_enemy_condition != self.previous_enemy_condition:
             self.redraw()
+            self.previous_enemy_condition = self.current_enemy_condition
 
     def redraw(self):
-        if self.current_condition < DamageStates.DEAD:
-            if self.current_condition == DamageStates.HEALTHY:
-                self.sprite.loadTexture(self.states[0])
-            elif self.current_condition == DamageStates.DAMAGED:
-                self.sprite.loadTexture(self.states[1])
-            elif self.current_condition == DamageStates.VERY_DAMAGED:
-                self.sprite.loadTexture(self.states[2])
-            elif self.current_condition == DamageStates.NEAR_DEAD:
-                self.sprite.loadTexture(self.states[3])
-        else:
-            self.sprite.loadTexture(self.states[4])
+        self.sprite.loadTexture(self.states[self.current_enemy_condition])
 
     def update_healthy(self):
-        self.current_condition = DamageStates.HEALTHY
-        if self.hp <= 7:
+        self.current_enemy_condition = DamageStates.HEALTHY
+        if self.hpPercentage < 100:
+            self.current_enemy_condition = DamageStates.DAMAGED
             self.fsm.setstate(self.update_damaged)
 
     def update_damaged(self):
-        self.current_condition = DamageStates.DAMAGED
-        if self.hp <= 4:
+        if self.hpPercentage <= 70:
+            self.current_enemy_condition = DamageStates.VERY_DAMAGED
             self.fsm.setstate(self.update_verydamaged)
 
     def update_verydamaged(self):
-        self.current_condition = DamageStates.VERY_DAMAGED
-        if self.hp <= 2:
+        if self.hpPercentage <= 30:
+            self.current_enemy_condition = DamageStates.NEAR_DEAD
             self.fsm.setstate(self.update_neardead)
 
     def update_neardead(self):
-        self.current_condition = DamageStates.NEAR_DEAD
-        if self.hp <= 0:
+        if self.current_hp <= 0:
+            self.current_enemy_condition = DamageStates.DEAD
             self.fsm.setstate(self.update_dead)
 
     def update_dead(self):
-        self.current_condition = DamageStates.DEAD
+        self.current_enemy_condition = DamageStates.DEAD
 
     def re_path(self , x, y):
         self.desired_path.clear()
@@ -122,3 +115,11 @@ class EnemyMain:
                                             self.data.map.cost_map, self.data.map.width,
                                             self.data.map.height).decided_path
             self.facing = pyasge.Point2D(-1, 0)
+
+
+class DamageStates(IntEnum):
+    HEALTHY = 0
+    DAMAGED = 1
+    VERY_DAMAGED = 2
+    NEAR_DEAD = 3
+    DEAD = 4

@@ -15,6 +15,8 @@ class Bullet:
         self.bullet_type = None
         if bullet_type == 'player':
             self.bullet_type = BulletType.Player
+        elif bullet_type == 'powerup':
+            self.bullet_type = BulletType.PowerUp
         elif bullet_type == 'enemy':
             self.bullet_type = BulletType.Enemy
 
@@ -37,3 +39,4 @@ class Bullet:
 class BulletType(Enum):
     Enemy = 0,
     Player = 1
+    PowerUp = 2

@@ -2,7 +2,7 @@ import pyasge
 from A_star_pathfinding import Pathfinding
 from enemyMain import EnemyMain
 
-from projetiles import Projectiles
+from projectiles import Projectiles
 
 class EnemyR(EnemyMain):
     def __init__(self, data, start_pos: pyasge.Point2D, Range, health, speed) -> None:

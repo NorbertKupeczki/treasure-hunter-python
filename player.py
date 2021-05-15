@@ -1,6 +1,6 @@
 import pyasge
 import math
-from projetiles import Projectiles
+from projectiles import Projectiles
 
 
 class Player:
