@@ -4,7 +4,7 @@ class Medkit:
     def __init__(self, spawn: pyasge.Point2D):
         self.id = 2
         self.sprite = pyasge.Sprite()
-        self.sprite.loadTexture("/data/images/jewel.png")
+        self.sprite.loadTexture("/data/images/medkit.png")
         self.sprite.x = spawn.x - self.sprite.width * 0.5
         self.sprite.y = spawn.y - self.sprite.height * 0.5
         self.spawnGem = True
