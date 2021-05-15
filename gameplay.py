@@ -55,6 +55,9 @@ class GamePlay(GameState):
 
         self.game_pad = self.data.inputs.getGamePad(0)
 
+        self.enemies_left = 0
+
+
     def load_game_map(self, level_num) -> None:
         self.data.map = Map(str(level_num))
 
@@ -68,7 +71,11 @@ class GamePlay(GameState):
                 self.data.enemies.append(EnemyR(self.data, pyasge.Point2D(enemy.coordinate[0] * self.data.tile_size,enemy.coordinate[1] * self.data.tile_size), 8, 10, 80))   # the 3 numbers at the end mean the range of vision range, the health, the speed
                 ranged_enemy_counter = 0
             else:
-                self.data.enemies.append(Enemy(self.data, pyasge.Point2D(enemy.coordinate[0] * self.data.tile_size, enemy.coordinate[1] * self.data.tile_size), 5, 10,60 ))
+                self.data.enemies.append(Enemy(self.data, pyasge.Point2D(enemy.coordinate[0] * self.data.tile_size, enemy.coordinate[1] * self.data.tile_size), 5, 10, 60))
+
+        self.enemies_left = len(self.data.enemies)
+
+
 
         for breakable in self.data.map.layers[4].tiles:
             self.data.breakables.append(Vase(pyasge.Point2D(breakable.coordinate[0] * self.data.tile_size,
@@ -117,9 +124,24 @@ class GamePlay(GameState):
         """
         Updating the enemy array
         """
+
+        if len(self.data.enemies) != self.enemies_left:
+            self.enemies_left = len(self.data.enemies)
+            for x in self.data.enemies:
+                x.re_calc = True
+
+
         for enemy in self.data.enemies:
             enemy.move_enemy(game_time, pyasge.Point2D(self.data.world_loc.x, self.data.world_loc.y), pyasge.Point2D(self.data.tile_loc.x, self.data.tile_loc.y))
             enemy.update() # call the update function to change texture
+
+        for x in range(len(self.data.enemies)):
+            saved = x
+            for z in range(len(self.data.enemies)):
+                if z != saved:
+                    if self.data.enemies[x].saved_tile[0] == self.data.enemies[z].enemy_curr_tile_cord[0] and self.data.enemies[x].saved_tile[1] == self.data.enemies[z].enemy_curr_tile_cord[1]:
+                        self.data.enemies[x].re_path(self.data.enemies[z].enemy_curr_tile_cord[0], self.data.enemies[z].enemy_curr_tile_cord[1])  # should send the coords of the obstacle so they dont overlap by mistake
+
         """
         Updating enemy projectiles, if the function returns True,
         the player loses 1 HP and the health bar gets updated

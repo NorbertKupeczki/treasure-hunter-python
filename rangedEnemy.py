@@ -23,10 +23,10 @@ class EnemyR(EnemyMain):
                 self.reload = True
 
 
-        enemy_curr_tile_cord = (int(((self.sprite.x + self.sprite.width * 0.5) / self.data.tile_size)),
+        self.enemy_curr_tile_cord = (int(((self.sprite.x + self.sprite.width * 0.5) / self.data.tile_size)),
                                 int((self.sprite.y + self.sprite.height * 0.5) / self.data.tile_size))
 
-        distance = EnemyMain.distanceToPlayer(self, player_location_tile.x, player_location_tile.y, enemy_curr_tile_cord) # this si inhertied
+        distance = EnemyMain.distanceToPlayer(self, player_location_tile.x, player_location_tile.y, self.enemy_curr_tile_cord) # this si inhertied
 
         if distance < self.range:
             curr_pos_prev = (self.sprite.x, self.sprite.y)
@@ -38,24 +38,25 @@ class EnemyR(EnemyMain):
                 self.old_player_pos = player_location_tile
 
 
-                if int(enemy_curr_tile_cord[0]) == int(player_location_tile.x) and int(enemy_curr_tile_cord[1]) == int(player_location_tile.y):
+                if int(self.enemy_curr_tile_cord[0]) == int(player_location_tile.x) and int(self.enemy_curr_tile_cord[1]) == int(player_location_tile.y):
 
+                    # self.re_path()
                     self.desired_path.clear()
 
-                    if self.data.map.cost_map[int(enemy_curr_tile_cord[1]) + 1][int(enemy_curr_tile_cord[0])] < 1000:  # go to the bottom
-                        self.desired_path = Pathfinding(enemy_curr_tile_cord, (int(enemy_curr_tile_cord[0]), int(enemy_curr_tile_cord[1]) + 1), self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
+                    if self.data.map.cost_map[int(self.enemy_curr_tile_cord[1]) + 1][int(self.enemy_curr_tile_cord[0])] < 1000:  # go to the bottom
+                        self.desired_path = Pathfinding(self.enemy_curr_tile_cord, (int(self.enemy_curr_tile_cord[0]), int(self.enemy_curr_tile_cord[1]) + 1), self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
                         self.facing = pyasge.Point2D(0, -1)
 
-                    elif self.data.map.cost_map[int(enemy_curr_tile_cord[1]) - 1][int(enemy_curr_tile_cord[0])] < 1000:  # go to the top
-                        self.desired_path = Pathfinding(enemy_curr_tile_cord, (int(enemy_curr_tile_cord[0]), int(enemy_curr_tile_cord[1]) - 1), self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
+                    elif self.data.map.cost_map[int(self.enemy_curr_tile_cord[1]) - 1][int(self.enemy_curr_tile_cord[0])] < 1000:  # go to the top
+                        self.desired_path = Pathfinding(self.enemy_curr_tile_cord, (int(self.enemy_curr_tile_cord[0]), int(self.enemy_curr_tile_cord[1]) - 1), self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
                         self.facing = pyasge.Point2D(0, 1)
 
-                    elif self.data.map.cost_map[int(enemy_curr_tile_cord[1])][int(enemy_curr_tile_cord[0]) - 1] < 1000:  # go to the left
-                        self.desired_path = Pathfinding(enemy_curr_tile_cord, (int(enemy_curr_tile_cord[0]) - 1, int(enemy_curr_tile_cord[1])), self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
+                    elif self.data.map.cost_map[int(self.enemy_curr_tile_cord[1])][int(self.enemy_curr_tile_cord[0]) - 1] < 1000:  # go to the left
+                        self.desired_path = Pathfinding(self.enemy_curr_tile_cord, (int(self.enemy_curr_tile_cord[0]) - 1, int(self.enemy_curr_tile_cord[1])), self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
                         self.facing = pyasge.Point2D(1, 0)
 
-                    elif self.data.map.cost_map[int(enemy_curr_tile_cord[1])][int(enemy_curr_tile_cord[0]) + 1] < 1000:  # go to the right
-                        self.desired_path = Pathfinding(enemy_curr_tile_cord, (int(enemy_curr_tile_cord[0]) + 1, int(enemy_curr_tile_cord[1])), self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
+                    elif self.data.map.cost_map[int(self.enemy_curr_tile_cord[1])][int(self.enemy_curr_tile_cord[0]) + 1] < 1000:  # go to the right
+                        self.desired_path = Pathfinding(self.enemy_curr_tile_cord, (int(self.enemy_curr_tile_cord[0]) + 1, int(self.enemy_curr_tile_cord[1])), self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
                         self.facing = pyasge.Point2D(-1, 0)
 
                 else:
@@ -69,12 +70,15 @@ class EnemyR(EnemyMain):
 
                         self.desired_path.clear()
 
-                        self.desired_path = Pathfinding(enemy_curr_tile_cord, (int(goal_tile[0]), int(goal_tile[1])), self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
+                        self.desired_path = Pathfinding(self.enemy_curr_tile_cord, (int(goal_tile[0]), int(goal_tile[1])), self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
+                        if len(self.desired_path) > 30:
+                            self.desired_path.clear()
 
                         self.desired_path.pop()
 
 
             if len(self.desired_path) > 0:
+                self.saved_tile = (self.desired_path[len(self.desired_path)-1].tile[0], self.desired_path[len(self.desired_path)-1].tile[1])
 
                 player_pos.y = int(self.desired_path[len(self.desired_path) - 1].tile[1] * self.data.tile_size)
                 player_pos.x = int(self.desired_path[len(self.desired_path) - 1].tile[0] * self.data.tile_size)

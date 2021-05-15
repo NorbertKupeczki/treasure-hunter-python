@@ -2,6 +2,7 @@ import math
 import pyasge
 from fsm import FSM
 from damagestates import DamageStates
+from A_star_pathfinding import Pathfinding
 
 
 
@@ -40,6 +41,9 @@ class EnemyMain:
         self.sprite.y = start_pos.y
 
         self.range = Range
+        self.re_calc = False
+        self.saved_tile = (self.sprite.x, self.sprite.y)
+        self.enemy_curr_tile_cord = (self.sprite.x, self.sprite.y)
 
 
     def distanceToPlayer(self, x, y, enemy_tile):  # distance from the player in tile form
@@ -93,3 +97,24 @@ class EnemyMain:
 
     def update_dead(self):
         self.current_condition = DamageStates.DEAD
+
+    def re_path(self , x, y):
+        self.desired_path.clear()
+        if (self.data.map.cost_map[int(self.enemy_curr_tile_cord[1]) + 1][int(self.enemy_curr_tile_cord[0])] < 1000) and (int(self.enemy_curr_tile_cord[1] +1) != y and int(self.enemy_curr_tile_cord[0]) != x):  # go to the bottom
+            self.desired_path = Pathfinding(self.enemy_curr_tile_cord, (int(self.enemy_curr_tile_cord[0]), int(self.enemy_curr_tile_cord[1]) + 1),self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
+            self.facing = pyasge.Point2D(0, -1)
+
+        elif (self.data.map.cost_map[int(self.enemy_curr_tile_cord[1]) - 1][int(self.enemy_curr_tile_cord[0])] < 1000 and (int(self.enemy_curr_tile_cord[1] - 1) != y and int(self.enemy_curr_tile_cord[0]) != x)):  # go to the top
+            self.desired_path = Pathfinding(self.enemy_curr_tile_cord, (int(self.enemy_curr_tile_cord[0]), int(self.enemy_curr_tile_cord[1]) - 1), self.data.map.cost_map, self.data.map.width,self.data.map.height).decided_path
+            self.facing = pyasge.Point2D(0, 1)
+
+        elif (self.data.map.cost_map[int(self.enemy_curr_tile_cord[1])][int(self.enemy_curr_tile_cord[0]) - 1] < 1000 and (int(self.enemy_curr_tile_cord[1]) != y and int(self.enemy_curr_tile_cord[0] -1) != x)):  # go to the left
+            self.desired_path = Pathfinding(self.enemy_curr_tile_cord, (int(self.enemy_curr_tile_cord[0]) - 1, int(self.enemy_curr_tile_cord[1])), self.data.map.cost_map, self.data.map.width, self.data.map.height).decided_path
+            self.facing = pyasge.Point2D(1, 0)
+
+        elif (self.data.map.cost_map[int(self.enemy_curr_tile_cord[1])][int(self.enemy_curr_tile_cord[0]) + 1] < 1000 and (int(self.enemy_curr_tile_cord[1]) != y and int(self.enemy_curr_tile_cord[0] +1 ) != x)) :  # go to the right
+            self.desired_path = Pathfinding(self.enemy_curr_tile_cord,
+                                            (int(self.enemy_curr_tile_cord[0]) + 1, int(self.enemy_curr_tile_cord[1])),
+                                            self.data.map.cost_map, self.data.map.width,
+                                            self.data.map.height).decided_path
+            self.facing = pyasge.Point2D(-1, 0)

@@ -12,12 +12,12 @@ class Enemy(EnemyMain):
 
     def move_enemy(self, game_time: pyasge.GameTime, player_location: pyasge.Point2D, player_location_tile: pyasge.Point2D):
 
-        enemy_curr_tile_cord = (int(((self.sprite.x + self.sprite.width * 0.5) / self.data.tile_size)),
+        self.enemy_curr_tile_cord = (int(((self.sprite.x + self.sprite.width * 0.5) / self.data.tile_size)),
                                 int((self.sprite.y + self.sprite.height * 0.5) / self.data.tile_size))
 
 
 
-        distance = EnemyMain.distanceToPlayer(self,player_location_tile.x, player_location_tile.y, enemy_curr_tile_cord)
+        distance = EnemyMain.distanceToPlayer(self,player_location_tile.x, player_location_tile.y, self.enemy_curr_tile_cord)
 
         if distance < self.range:
 
@@ -25,26 +25,31 @@ class Enemy(EnemyMain):
 
             player_pos = player_location
 
-            if int(self.old_player_pos.x) != int(player_location_tile.x) or int(self.old_player_pos.y) != int(player_location_tile.y):
-
+            if (int(self.old_player_pos.x) != int(player_location_tile.x) or int(self.old_player_pos.y) != int(player_location_tile.y)) or self.re_calc is True:
+                self.re_calc = False
                 self.desired_path.clear()
                 self.old_player_pos = player_location_tile
 
-                if int(enemy_curr_tile_cord[0]) == int(player_location_tile.x) and int(enemy_curr_tile_cord[1]) == int(player_location_tile.y):
+                if int(self.enemy_curr_tile_cord[0]) == int(player_location_tile.x) and int(self.enemy_curr_tile_cord[1]) == int(player_location_tile.y):
                     #attack function call
                     self.desired_path.clear()
 
                 else:
                     goal_tile = (player_location_tile.x, player_location_tile.y)
 
-                    self.desired_path = Pathfinding(enemy_curr_tile_cord, (int(goal_tile[0]), int(goal_tile[1])),
+                    self.desired_path = Pathfinding(self.enemy_curr_tile_cord, (int(goal_tile[0]), int(goal_tile[1])),
                                                     self.data.map.cost_map, self.data.map.width,
                                                     self.data.map.height).decided_path
+                    if len(self.desired_path) > 30:
+                        self.desired_path.clear()
+
 
                     self.desired_path.pop()
 
 
             if len(self.desired_path) > 0:
+                self.saved_tile = (self.desired_path[len(self.desired_path) - 1].tile[0],
+                                   self.desired_path[len(self.desired_path) - 1].tile[1])
 
                 player_pos.y = int(self.desired_path[len(self.desired_path) - 1].tile[1] * self.data.tile_size)
                 player_pos.x = int(self.desired_path[len(self.desired_path) - 1].tile[0] * self.data.tile_size)
