@@ -1,6 +1,7 @@
 import pyasge
 from gamestate import GameState, GameStateID
 from player import Player
+from enemyMain import EnemyMain
 from enemy import Enemy
 from rangedEnemy import EnemyR
 from door import Door
@@ -29,6 +30,10 @@ class GamePlay(GameState):
         self.hud = HUD(data)
         self.player = Player(data, self.data.map.starting_location)
         self.update_list.append(self.player)
+        # iframes (invincibility frames) is how long the player can't get hit for after receiving damage
+        self.IFRAMESLENGTH = 1.2       # Change this value during game testing (in capitals to indicate it's a constant)
+        self.iframes = self.IFRAMESLENGTH
+        self.canbehit = True
 
         self.entrance_door = Door(self.data.map.starting_location)
         self.exit_door = Door(self.data.map.end_location)
@@ -116,24 +121,36 @@ class GamePlay(GameState):
                 self.hud.health_bar.heal()
 
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
+        print(str(self.canbehit))
+
+        if self.canbehit == False:
+            self.iframes -= game_time.fixed_timestep
+            if self.iframes < 0:
+                self.canbehit = True
+                self.iframes = self.IFRAMESLENGTH
 
         for item in self.update_list:
             item.update(game_time)
 
         self.player.move_player(game_time, self.keys, self.game_pad)
-        """
-        Updating the enemy array
-        """
 
+        """
+        Updating the enemy array, collision check between player and zombie is located here to reduce code complexity
+        by removing another for loop
+        """
         if len(self.data.enemies) != self.enemies_left:
             self.enemies_left = len(self.data.enemies)
             for x in self.data.enemies:
                 x.re_calc = True
 
-
         for enemy in self.data.enemies:
             enemy.move_enemy(game_time, pyasge.Point2D(self.data.world_loc.x, self.data.world_loc.y), pyasge.Point2D(self.data.tile_loc.x, self.data.tile_loc.y))
             enemy.update() # call the update function to change texture
+            if self.canbehit:
+                if enemy.playerZombieCollision(pyasge.Point2D(self.data.tile_loc.x, self.data.tile_loc.y)):
+                    self.canbehit = False
+                    self.player.health -= 1
+                    self.hud.health_bar.lose_health(self.player.health)
 
         for x in range(len(self.data.enemies)):
             saved = x
@@ -146,9 +163,11 @@ class GamePlay(GameState):
         Updating enemy projectiles, if the function returns True,
         the player loses 1 HP and the health bar gets updated
         """
-        if self.data.enemy_projectiles.update_projectiles(game_time, self.player):
-            self.player.health -= 1
-            self.hud.health_bar.lose_health(self.player.health)
+        if self.canbehit:
+            if self.data.enemy_projectiles.update_projectiles(game_time, self.player):
+                self.canbehit = False
+                self.player.health -= 1
+                self.hud.health_bar.lose_health(self.player.health)
         """
         Updating the gems, if all the gems are collected, the exit door opens
         If the player is close enough to the exit door, the game goes to the next level screen

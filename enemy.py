@@ -15,9 +15,7 @@ class Enemy(EnemyMain):
         self.enemy_curr_tile_cord = (int(((self.sprite.x + self.sprite.width * 0.5) / self.data.tile_size)),
                                 int((self.sprite.y + self.sprite.height * 0.5) / self.data.tile_size))
 
-
-
-        distance = EnemyMain.distanceToPlayer(self,player_location_tile.x, player_location_tile.y, self.enemy_curr_tile_cord)
+        distance = EnemyMain.distanceToPlayer(self, player_location_tile.x, player_location_tile.y, self.enemy_curr_tile_cord)
 
         if distance < self.range:
 
@@ -31,7 +29,6 @@ class Enemy(EnemyMain):
                 self.old_player_pos = player_location_tile
 
                 if int(self.enemy_curr_tile_cord[0]) == int(player_location_tile.x) and int(self.enemy_curr_tile_cord[1]) == int(player_location_tile.y):
-                    #attack function call
                     self.desired_path.clear()
 
                 else:
@@ -43,9 +40,7 @@ class Enemy(EnemyMain):
                     if len(self.desired_path) > 30:
                         self.desired_path.clear()
 
-
                     self.desired_path.pop()
-
 
             if len(self.desired_path) > 0:
                 self.saved_tile = (self.desired_path[len(self.desired_path) - 1].tile[0],

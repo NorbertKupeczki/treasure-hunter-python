@@ -45,7 +45,6 @@ class EnemyMain:
         self.saved_tile = (self.sprite.x, self.sprite.y)
         self.enemy_curr_tile_cord = (self.sprite.x, self.sprite.y)
 
-
     def distanceToPlayer(self, x, y, enemy_tile):  # distance from the player in tile form
 
         dx = abs(x - enemy_tile[0])
@@ -53,6 +52,11 @@ class EnemyMain:
 
         return math.sqrt(dx * dx + dy * dy)
 
+    def playerZombieCollision(self, player_location_tile: pyasge.Sprite()):
+        if player_location_tile.x == self.enemy_curr_tile_cord[0] and player_location_tile.y == self.enemy_curr_tile_cord[1]:
+            return True
+        else:
+            return False
 
     def update(self):
         self.fsm.update()
