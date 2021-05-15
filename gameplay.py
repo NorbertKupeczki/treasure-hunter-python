@@ -121,7 +121,7 @@ class GamePlay(GameState):
                 self.hud.health_bar.heal()
 
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
-        
+
         if self.canbehit == False:
             self.iframes -= game_time.fixed_timestep
             if self.iframes < 0:
