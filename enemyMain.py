@@ -10,7 +10,7 @@ class EnemyMain:
         self.data = data
         self.states = ["/data/images/character_zombie_healthy.png",
                        "/data/images/character_zombie_damaged.png",
-                       "data/images/character_zombie_verydamaged.png",
+                       "/data/images/character_zombie_verydamaged.png",
                        "/data/images/character_zombie_neardead.png",
                        "/data/images/character_zombie_dead.png"]
 

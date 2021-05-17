@@ -1,7 +1,6 @@
 import math
 
 
-
 class Node:
 
     def __init__(self, Tile):
@@ -14,11 +13,8 @@ class Node:
         self.f_score = 0
 
 
-
 class Pathfinding:
-
-    #send the start and the goal
-
+    # send the start and the goal
     def __init__(self, Start, Goal, Costs, width, height) -> None:
         self.costs = Costs
         self.start = Node(Start)
@@ -32,8 +28,6 @@ class Pathfinding:
         self.decided_path = self.A_path(self.start, self.goal)
         self.decided_path.insert(0, self.goal)
 
-
-
     def heuristic(self, current_node, goal):
 
         dx = abs(current_node.tile[0] - goal.tile[0])
@@ -41,11 +35,9 @@ class Pathfinding:
 
         return math.sqrt(dx * dx + dy * dy)
 
-
-
     def lowest_node(self, list, goal):
-
         smallest = 10000000000
+        saved_index = None
 
         for i in range(len(list)):
 
@@ -58,7 +50,6 @@ class Pathfinding:
 
         return list[saved_index]
 
-
     def final_path(self, node):
         path = []
 
@@ -67,8 +58,6 @@ class Pathfinding:
             path.append(node)
 
         return path
-
-
 
     def get_neighbours(self, current_node):
 
@@ -91,14 +80,9 @@ class Pathfinding:
             neighbours[i].parent = current_node
         return neighbours
 
-
-
     def A_path(self, start, goal):
-
         open_List = []
-
         open_List.append(start)
-
         closed_List = []
 
         while len(open_List) != 0:
@@ -123,7 +107,6 @@ class Pathfinding:
 
                         present = True
 
-
                 if present:
                     pass
                 else:
@@ -137,7 +120,6 @@ class Pathfinding:
                         if neighbour[i].tile == open_List[x].tile:
                             present = True
 
-
                     if present:
                         open_neighbour = neighbour[i]
                         if neighbour[i].g_score < open_neighbour.g_score:
@@ -146,7 +128,6 @@ class Pathfinding:
 
                     else:
                         open_List.append(neighbour[i])
-
 
         return False
 

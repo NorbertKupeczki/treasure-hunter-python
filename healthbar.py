@@ -4,16 +4,16 @@ import pyasge
 class HealthBar:
     def __init__(self, data):
         self.data = data
-        self.hearts = [Heart(0),
-                       Heart(1),
-                       Heart(2),
-                       Heart(3),
-                       Heart(4)]
+        self.hearts = [Heart(0, self.data.z_order['UI']),
+                       Heart(1, self.data.z_order['UI']),
+                       Heart(2, self.data.z_order['UI']),
+                       Heart(3, self.data.z_order['UI']),
+                       Heart(4, self.data.z_order['UI'])]
 
     def render_health_bar(self, renderer: pyasge.Renderer, corner: pyasge.Point2D):
         for heart in self.hearts:
             heart.sprite.x = heart.position.x + corner.x
-            heart.sprite.y = corner.y + self.data.screen_size[1] - heart.sprite.height * 2 - 5
+            heart.sprite.y = corner.y + self.data.screen_size[1] - heart.sprite.height * 2 - 2
             renderer.render(heart.sprite)
 
     def heal(self):
@@ -26,13 +26,13 @@ class HealthBar:
 
 
 class Heart:
-    def __init__(self, index: int):
+    def __init__(self, index: int, z_order: int):
         self.index = index
         self.sprite = pyasge.Sprite()
         self.SPRITE_SIZE = pyasge.Point2D(13, 12)
         self.position = pyasge.Point2D()
         self.init_hearts()
-        self.sprite.z_order = 5
+        self.sprite.z_order = z_order
 
     def set_sprite(self, x: int, y: int, sprite: pyasge.Sprite()):
         sprite.src_rect[pyasge.Sprite.SourceRectIndex.START_X] = int(x)

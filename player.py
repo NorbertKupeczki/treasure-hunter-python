@@ -4,7 +4,7 @@ from projectiles import Projectiles
 
 
 class Player:
-    def __init__(self, data, start_pos: pyasge.Point2D):
+    def __init__(self, data):
         self.data = data
         self.sprite = pyasge.Sprite()
         self.sprite.loadTexture("/data/images/player_sh.png")
@@ -18,8 +18,8 @@ class Player:
         }
         self.set_sprite(int(46), int(self.sprite_sheet['walk_down']))
         self.sprite.z_order = self.data.z_order['player']
-        self.sprite.x = start_pos.x
-        self.sprite.y = start_pos.y
+        self.sprite.x = self.data.map.starting_location.x
+        self.sprite.y = self.data.map.starting_location.y
         self.player_speed = 300
         self.velocity = pyasge.Point2D()
         self.game_pad_enabled = False
@@ -29,13 +29,23 @@ class Player:
         self.RELOAD_TIME = 0.5
         self.reload_time = self.RELOAD_TIME
         self.elapsed_time = 0.0
-        self.health = 5
+
+        self.HEALTH = 5
+        self.health = self.HEALTH
+
+        self.INV_TIME = 1.2
+        self.invulnerable = 0.0
 
     def update(self, game_time: pyasge.GameTime):
         if self.reload_time < self.RELOAD_TIME:
             self.reload_time += game_time.fixed_timestep
 
         self.projectiles.update_projectiles(game_time, self)
+
+        if self.invulnerable > 0.02:
+            self.invulnerable -= game_time.fixed_timestep
+        elif 0.0 < self.invulnerable <= 0.02 or self.invulnerable < 0.0:
+            self.invulnerable = 0.0
 
     def move_player(self, game_time: pyasge.GameTime, keys, game_pad):
         if game_pad.connected and self.game_pad_enabled:
@@ -47,6 +57,8 @@ class Player:
                 self.velocity.y = game_pad.y
             else:
                 self.velocity.y = 0
+            if self.data.inputs.getGamePad(0).RIGHT_TRIGGER != -1.0:
+                self.shoot()
         else:
             if keys[pyasge.KEYS.KEY_W]:
                 self.velocity.y = -1
@@ -61,6 +73,9 @@ class Player:
                 self.velocity.x = 1
             else:
                 self.velocity.x = 0
+
+            if keys[pyasge.KEYS.KEY_SPACE]:
+                self.shoot()
 
         if self.velocity.x != 0 or self.velocity.y != 0:
             animation_speed = math.sqrt(pow(self.velocity.x, 2) + pow(self.velocity.y, 2))
@@ -122,7 +137,16 @@ class Player:
         return self.game_pad_enabled
 
     def max_heal(self):
-        self.health = 5
+        self.health = self.HEALTH
+
+    def suffer_damage(self, health_bar) -> bool:
+        if self.invulnerable:
+            return False
+        else:
+            self.health -= 1
+            self.invulnerable = self.INV_TIME
+            health_bar.lose_health(self.health)
+            return True
 
     def shoot(self):
         spawn_point = pyasge.Point2D(self.sprite.x + self.sprite.width * 0.5 + self.facing.x * 10,

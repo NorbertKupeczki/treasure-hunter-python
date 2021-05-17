@@ -1,17 +1,10 @@
 import pyasge
 from gamestate import GameState, GameStateID
 from player import Player
-from enemy import Enemy
-from rangedEnemy import EnemyR
 from door import Door
 from hud import HUD
 from projectiles import Projectiles
 from maploader import MapLoader
-
-from map import Map
-
-from gem import Gem
-from vase import Vase
 
 
 class GamePlay(GameState):
@@ -25,16 +18,11 @@ class GamePlay(GameState):
 
         # initialising HUD and the player
         self.hud = HUD(data)
-        self.player = Player(data, self.data.map.starting_location)
+        self.player = Player(data)
         self.update_list.append(self.player)
 
-        # iframes (invincibility frames) is how long the player can't get hit for after receiving damage
-        self.IFRAMESLENGTH = 1.2       # Change this value during game testing (in capitals to indicate it's a constant)
-        self.iframes = self.IFRAMESLENGTH
-        self.canbehit = True
-
-        self.exit_door = Door(self.data.map.end_location, data)
-        self.update_list.append(Door(self.data.map.starting_location, data))
+        self.exit_door = Door('end', data)
+        self.update_list.append(Door('start', data))
         self.update_list.append(self.exit_door)
 
         # register the key handler for this class
@@ -58,7 +46,7 @@ class GamePlay(GameState):
 
         self.game_pad = self.data.inputs.getGamePad(0)
 
-        self.enemies_left = 0
+        self.enemies_left = len(self.data.enemies)
 
     def input(self, event: pyasge.KeyEvent) -> None:
         if event.action is not pyasge.KEYS.KEY_REPEATED:
@@ -91,24 +79,10 @@ class GamePlay(GameState):
                 self.hud.health_bar.heal()
 
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
-
-        if self.canbehit == False:
-            self.iframes -= game_time.fixed_timestep
-            if self.iframes < 0:
-                self.canbehit = True
-                self.iframes = self.IFRAMESLENGTH
-
         for item in self.update_list:
             item.update(game_time)
 
         self.player.move_player(game_time, self.keys, self.game_pad)
-
-        if self.player.game_pad_enabled:
-            if self.data.inputs.getGamePad(0).RIGHT_TRIGGER != -1.0:
-                self.player.shoot()
-        else:
-            if self.keys[pyasge.KEYS.KEY_SPACE]:
-                self.player.shoot()
 
         """
         Updating the enemy array, collision check between player and zombie is located here to reduce code complexity
@@ -116,16 +90,16 @@ class GamePlay(GameState):
         """
         if len(self.data.enemies) != self.enemies_left:
             self.enemies_left = len(self.data.enemies)
-            for x in self.data.enemies:
-                x.re_calc = True
+            for enemy in self.data.enemies:
+                enemy.re_calc = True
 
         for enemy in self.data.enemies:
             enemy.move_enemy(game_time, pyasge.Point2D(self.data.world_loc.x, self.data.world_loc.y),
                              pyasge.Point2D(self.data.tile_loc.x, self.data.tile_loc.y))
             enemy.update()  # call the update function to change texture
-            if self.canbehit:
+            if not self.player.invulnerable:
                 if enemy.playerZombieCollision(pyasge.Point2D(self.data.tile_loc.x, self.data.tile_loc.y)):
-                    self.receivedDamage()
+                    self.player.suffer_damage(self.hud.health_bar)
 
         for x in range(len(self.data.enemies)):
             saved = x
@@ -138,9 +112,9 @@ class GamePlay(GameState):
         Updating enemy projectiles, if the function returns True,
         the player loses 1 HP and the health bar gets updated
         """
-        if self.canbehit:
-            if self.data.enemy_projectiles.update_projectiles(game_time, self.player):
-                self.receivedDamage()
+        if self.data.enemy_projectiles.update_projectiles(game_time, self.player):
+            if not self.player.invulnerable:
+                self.player.suffer_damage(self.hud.health_bar)
 
         for item in self.data.collectibles:
             if item.check_collision(self.player.sprite):
@@ -175,11 +149,6 @@ class GamePlay(GameState):
             return GameStateID.GAME_OVER
         else:
             return GameStateID.GAMEPLAY
-
-    def receivedDamage(self):
-        self.canbehit = False
-        self.player.health -= 1
-        self.hud.health_bar.lose_health(self.player.health)
 
     def render(self, game_time: pyasge.GameTime) -> None:
         corner = self.data.camera.look_at(self.player.get_sprite())

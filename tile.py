@@ -12,10 +12,6 @@ class MapTile:
         self.sprite.setMagFilter(pyasge.MagFilter.NEAREST)
         text_x -= 1
 
-        # temp_string_x = str(text_x / 27)
-        # temp_string_x = int(temp_string_x.split(".")[0])
-        # text_x = int(text_x - (27 * temp_string_x))
-
         temp_y = int(text_x / 27)
         text_x = int(text_x - (27 * temp_y))
 
