@@ -5,12 +5,9 @@ from enum import IntEnum
 from A_star_pathfinding import Pathfinding
 
 
-
-
-
 class EnemyMain:
-    def __init__(self, data, start_pos: pyasge.Point2D, Range, health, speed) -> None:
-
+    def __init__(self, data, start_pos: pyasge.Point2D) -> None:
+        self.data = data
         self.states = ["/data/images/character_zombie_healthy.png",
                        "/data/images/character_zombie_damaged.png",
                        "data/images/character_zombie_verydamaged.png",
@@ -22,8 +19,8 @@ class EnemyMain:
 
         self.old_player_pos = pyasge.Point2D(0, 0)
 
-        self.starting_hp = health
-        self.current_hp = health
+        self.starting_hp = 1
+        self.current_hp = 1
         self.hpPercentage = (self.current_hp / self.starting_hp) * 100
         self.fsm = FSM()
         self.fsm.setstate(self.update_healthy)
@@ -34,15 +31,14 @@ class EnemyMain:
         self.facing = pyasge.Point2D(0, 1)
 
         self.sprite.loadTexture(self.states[0])
+        self.sprite.z_order = self.data.z_order['enemy']
 
-        self.enemy_speed = speed
+        self.enemy_speed = None
 
-        self.data = data
+        self.sprite.x = start_pos.x * self.data.tile_size
+        self.sprite.y = start_pos.y * self.data.tile_size
 
-        self.sprite.x = start_pos.x
-        self.sprite.y = start_pos.y
-
-        self.range = Range
+        self.range = None
         self.re_calc = False
         self.saved_tile = (self.sprite.x, self.sprite.y)
         self.enemy_curr_tile_cord = (self.sprite.x, self.sprite.y)

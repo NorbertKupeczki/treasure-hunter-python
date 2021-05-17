@@ -8,39 +8,51 @@ class HUD:
 
         self.health_bar = HealthBar(data)
 
-        self.ui_text = pyasge.Text(self.data.fonts['main_text'], "DEMO")
-        self.ui_text.colour = pyasge.COLOURS.RED
-        self.ui_text.z_order = 5
-
-        self.world_coordinates = pyasge.Text(self.data.fonts['hud_text'], "World: ")
-        self.world_coordinates.colour = pyasge.COLOURS.LIME
-        self.world_coordinates.z_order = 5
-
-        self.tile_coordinates = pyasge.Text(self.data.fonts['hud_text'], "Tile: ")
-        self.tile_coordinates.colour = pyasge.COLOURS.LIME
-        self.tile_coordinates.z_order = 5
-
-        self.score = pyasge.Text(self.data.fonts['hud_text'], "Score: "+str(self.data.score))
-        self.score.colour = pyasge.COLOURS.LIME
-        self.score.z_order = 5
-
-        self.coords_on = False
+        self.ui_texts = [
+            UIText(pyasge.Point2D(5, 20), pyasge.COLOURS.LIME, 'hud_text', "Score: " + str(self.data.score), self.data),
+            UIText(pyasge.Point2D(120, 20), pyasge.COLOURS.LIME, 'hud_text', "World: ", self.data),
+            UIText(pyasge.Point2D(300, 20), pyasge.COLOURS.LIME, 'hud_text', "Tile: ", self.data),
+            UIText(pyasge.Point2D(self.data.screen_size[0] - 100, 20), pyasge.COLOURS.LIME, 'hud_text',
+                   "Level: "+str(self.data.level_selected), self.data)
+        ]
+        self.ui_texts[1].visible = False
+        self.ui_texts[2].visible = False
 
     def render_hud(self, corner: pyasge.Point2D):
-        self.ui_text.position = [self.data.screen_size[0] * 0.5 - self.ui_text.width * 0.5 + corner.x,
-                                 self.data.screen_size[1] - 5 + corner.y]
-        self.score.position = [corner.x + 5, corner.y + 25]
-        self.world_coordinates.position = [corner.x + 5, corner.y + 45]
-        self.tile_coordinates.position = [corner.x + 5, corner.y + 65]
+        self.update_coordinates()
 
-        self.world_coordinates.string = "World: " + str(int(self.data.world_loc.x)) + ':' + str(int(self.data.world_loc.y))
-        self.tile_coordinates.string = "Tile: " + str(int(self.data.tile_loc.x)) + ':' + str(int(self.data.tile_loc.y))
-        if self.coords_on:
-            self.data.renderer.render(self.tile_coordinates)
-            self.data.renderer.render(self.world_coordinates)
-        self.data.renderer.render(self.ui_text)
-        self.data.renderer.render(self.score)
+        for item in self.ui_texts:
+            item.update_pos(corner)
+            if item.visible:
+                item.render()
         self.health_bar.render_health_bar(self.data.renderer, corner)
 
     def update_score(self, score: int):
-        self.score.string = "Score: "+str(score)
+        self.ui_texts[0].update_text("Score: "+str(score))
+
+    def update_coordinates(self):
+        self.ui_texts[1].update_text("World: " + str(int(self.data.world_loc.x)) + ':' + str(int(self.data.world_loc.y)))
+        self.ui_texts[2].update_text("Tile: " + str(int(self.data.tile_loc.x)) + ':' + str(int(self.data.tile_loc.y)))
+
+    def switch_coordinates(self):
+        self.ui_texts[1].visible = not self.ui_texts[1].visible
+        self.ui_texts[2].visible = not self.ui_texts[2].visible
+
+
+class UIText:
+    def __init__(self, position: pyasge.Point2D, colour: pyasge.Colour, font: str, text: str, data):
+        self.data = data
+        self.text = pyasge.Text(self.data.fonts[font], text)
+        self.text.colour = colour
+        self.text.z_order = self.data.z_order['UI']
+        self.position = position
+        self.visible = True
+
+    def update_pos(self, corner: pyasge.Point2D):
+        self.text.position = [corner.x + self.position.x, corner.y + self.position.y]
+
+    def update_text(self, text: str):
+        self.text.string = text
+
+    def render(self):
+        self.data.renderer.render(self.text)

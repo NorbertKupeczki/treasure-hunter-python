@@ -17,7 +17,7 @@ class Player:
             'walk_down': 186
         }
         self.set_sprite(int(46), int(self.sprite_sheet['walk_down']))
-        self.sprite.z_order = 5
+        self.sprite.z_order = self.data.z_order['player']
         self.sprite.x = start_pos.x
         self.sprite.y = start_pos.y
         self.player_speed = 300
@@ -79,13 +79,13 @@ class Player:
                 self.set_sprite(animation_index, int(self.sprite_sheet['walk_right']))
                 self.facing = pyasge.Point2D(1, 0)
 
-        delta_x = self.player_speed * self.velocity.x * game_time.fixed_timestep
-        delta_y = self.player_speed * self.velocity.y * game_time.fixed_timestep
+        delta = pyasge.Point2D(self.player_speed * self.velocity.x * game_time.fixed_timestep,
+                               self.player_speed * self.velocity.y * game_time.fixed_timestep)
 
-        delta_xy = self.check_collision(delta_x, delta_y)
+        delta = self.check_collision(delta.x, delta.y)
 
-        self.sprite.x = self.sprite.x + delta_xy.x
-        self.sprite.y = self.sprite.y + delta_xy.y
+        self.sprite.x = self.sprite.x + delta.x
+        self.sprite.y = self.sprite.y + delta.y
 
     def set_sprite(self, x: int, y: int):
         self.sprite.src_rect[pyasge.Sprite.SourceRectIndex.START_X] = int(x)
@@ -121,9 +121,12 @@ class Player:
         self.game_pad_enabled = not self.game_pad_enabled
         return self.game_pad_enabled
 
+    def max_heal(self):
+        self.health = 5
+
     def shoot(self):
-        spawn_point = pyasge.Point2D(self.sprite.x + self.sprite.width * 0.5,
-                                     self.sprite.y + self.sprite.height * 0.5)
+        spawn_point = pyasge.Point2D(self.sprite.x + self.sprite.width * 0.5 + self.facing.x * 10,
+                                     self.sprite.y + self.sprite.height * 0.5 + self.facing.y * 10)
         if self.reload_time >= self.RELOAD_TIME:
             self.projectiles.shoot(spawn_point, self.facing)
             self.reload_time = 0.0
@@ -135,11 +138,7 @@ class Player:
     def is_passable(self, world_location: pyasge.Point2D()) -> bool:
         tile_loc = pyasge.Point2D(int(world_location.x / self.data.tile_size),
                                   int(world_location.y / self.data.tile_size))
-
-        if self.data.map.cost_map[int(tile_loc.y)][int(tile_loc.x)] >= 10000:
-            return False
-        else:
-            return True
+        return not self.data.map.cost_map[int(tile_loc.y)][int(tile_loc.x)] >= 10000
 
     def animation_controller(self, game_time: pyasge.GameTime, speed_mod: float) -> int:
         if self.elapsed_time >= 1.0:
@@ -152,3 +151,7 @@ class Player:
             return int(index * 46)
         else:
             return int(46)
+
+    def render(self):
+        self.data.renderer.render(self.sprite)
+        self.render_bullets()

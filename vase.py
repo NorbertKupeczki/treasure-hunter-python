@@ -12,6 +12,7 @@ class Vase:
                           "/data/images/vaseDamage2.png",
                           "/data/images/vaseDamage3.png"]
         self.sprite.loadTexture(self.imageList[0])
+        self.sprite.z_order = 2
         self.hp = 2
 
         self.prev_vase_condition = VaseConditions.INTACT

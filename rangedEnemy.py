@@ -4,27 +4,26 @@ from enemyMain import EnemyMain
 
 from projectiles import Projectiles
 
-class EnemyR(EnemyMain):
-    def __init__(self, data, start_pos: pyasge.Point2D, Range, health, speed) -> None:
-        super().__init__(data, start_pos, Range, health, speed)
 
-        self.projectiles = Projectiles(self.data)
+class EnemyR(EnemyMain):
+    def __init__(self, data, start_pos: pyasge.Point2D) -> None:
+        super().__init__(data, start_pos)
+        self.range = 8
+        self.current_hp = 3
+        self.starting_hp = 3
+        self.enemy_speed = 80
 
         self.reload = True
-        self.timer = 1.0
+        self.timer = 1.5
 
-
-    def move_enemy(self, game_time: pyasge.GameTime, player_location: pyasge.Point2D,player_location_tile: pyasge.Point2D):
-
-
+    def move_enemy(self, game_time: pyasge.GameTime, player_location: pyasge.Point2D, player_location_tile: pyasge.Point2D):
         if self.reload is False:
             self.timer -= game_time.fixed_timestep
             if self.timer < 0:
                 self.reload = True
 
-
         self.enemy_curr_tile_cord = (int(((self.sprite.x + self.sprite.width * 0.5) / self.data.tile_size)),
-                                int((self.sprite.y + self.sprite.height * 0.5) / self.data.tile_size))
+                                     int((self.sprite.y + self.sprite.height * 0.5) / self.data.tile_size))
 
         distance = EnemyMain.distanceToPlayer(self, player_location_tile.x, player_location_tile.y, self.enemy_curr_tile_cord) # this si inhertied
 
@@ -36,7 +35,6 @@ class EnemyR(EnemyMain):
 
                 self.desired_path.clear()
                 self.old_player_pos = player_location_tile
-
 
                 if int(self.enemy_curr_tile_cord[0]) == int(player_location_tile.x) and int(self.enemy_curr_tile_cord[1]) == int(player_location_tile.y):
 
@@ -75,7 +73,6 @@ class EnemyR(EnemyMain):
                             self.desired_path.clear()
 
                         self.desired_path.pop()
-
 
             if len(self.desired_path) > 0:
                 self.saved_tile = (self.desired_path[len(self.desired_path)-1].tile[0], self.desired_path[len(self.desired_path)-1].tile[1])
@@ -175,8 +172,5 @@ class EnemyR(EnemyMain):
 
         return player_saved_tile
 
-    def render_bullets(self, renderer):
-        for bullets in self.projectiles.projectiles:
-            renderer.render(bullets.sprite)
 
 

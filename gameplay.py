@@ -1,7 +1,6 @@
 import pyasge
 from gamestate import GameState, GameStateID
 from player import Player
-from enemyMain import EnemyMain
 from enemy import Enemy
 from rangedEnemy import EnemyR
 from door import Door
@@ -12,7 +11,6 @@ from map import Map
 
 from gem import Gem
 from vase import Vase
-from medkit import Medkit
 
 
 class GamePlay(GameState):
@@ -25,22 +23,22 @@ class GamePlay(GameState):
         self.data.gems = []
         self.data.enemies = []
         self.data.breakables = []
-        self.gems_in_level = 0
+        self.data.collectibles = []
         self.load_game_map(self.data.level_selected)
 
         # initialising HUD and the player
         self.hud = HUD(data)
         self.player = Player(data, self.data.map.starting_location)
         self.update_list.append(self.player)
+
         # iframes (invincibility frames) is how long the player can't get hit for after receiving damage
         self.IFRAMESLENGTH = 1.2       # Change this value during game testing (in capitals to indicate it's a constant)
         self.iframes = self.IFRAMESLENGTH
         self.canbehit = True
 
-        self.entrance_door = Door(self.data.map.starting_location)
-        self.exit_door = Door(self.data.map.end_location)
+        self.exit_door = Door(self.data.map.end_location, data)
+        self.update_list.append(Door(self.data.map.starting_location, data))
         self.update_list.append(self.exit_door)
-
 
         # register the key handler for this class
         self.data.inputs.addCallback(pyasge.EventType.E_KEY, self.input)
@@ -65,40 +63,27 @@ class GamePlay(GameState):
 
         self.enemies_left = 0
 
-
     def load_game_map(self, level_num) -> None:
         self.data.map = Map(str(level_num))
 
-        medkit_counter = 0
         for gem in self.data.map.layers[2].tiles:
-            medkit_counter += 1
-            if medkit_counter == 12:
-                self.data.gems.append(Medkit(pyasge.Point2D((gem.coordinate[0] + 0.5) * self.data.tile_size,(gem.coordinate[1] + 0.5) * self.data.tile_size)))
-                medkit_counter = 0
-            else:
-                self.data.gems.append(Gem(pyasge.Point2D((gem.coordinate[0] + 0.5) * self.data.tile_size,(gem.coordinate[1] + 0.5) * self.data.tile_size)))
-                self.gems_in_level += 1
+            self.data.gems.append(Gem(pyasge.Point2D((gem.coordinate[0] + 0.5) * self.data.tile_size,
+                                                     (gem.coordinate[1] + 0.5) * self.data.tile_size)))
 
         ranged_enemy_counter = 0
         for enemy in self.data.map.layers[3].tiles:
             ranged_enemy_counter += 1
             if ranged_enemy_counter == 3:
-                self.data.enemies.append(EnemyR(self.data, pyasge.Point2D(enemy.coordinate[0] * self.data.tile_size,enemy.coordinate[1] * self.data.tile_size),
-                                                8, 3, 80))   # the 3 numbers at the end mean the range of vision range, the health, the speed
+                self.data.enemies.append(EnemyR(self.data, pyasge.Point2D(enemy.coordinate[0], enemy.coordinate[1])))
                 ranged_enemy_counter = 0
             else:
-                self.data.enemies.append(Enemy(self.data, pyasge.Point2D(enemy.coordinate[0] * self.data.tile_size, enemy.coordinate[1] * self.data.tile_size),
-                                               5, 5, 60))
+                self.data.enemies.append(Enemy(self.data, pyasge.Point2D(enemy.coordinate[0], enemy.coordinate[1])))
 
         self.enemies_left = len(self.data.enemies)
-
-
 
         for breakable in self.data.map.layers[4].tiles:
             self.data.breakables.append(Vase(pyasge.Point2D(breakable.coordinate[0] * self.data.tile_size,
                                                             breakable.coordinate[1] * self.data.tile_size)))
-            self.gems_in_level += 1
-
 
     def input(self, event: pyasge.KeyEvent) -> None:
         if event.action is not pyasge.KEYS.KEY_REPEATED:
@@ -115,13 +100,9 @@ class GamePlay(GameState):
                 else:
                     print("No game pad connected!")
 
-        if self.keys[pyasge.KEYS.KEY_SPACE]:
-            if event.action is pyasge.KEYS.KEY_PRESSED:
-                self.player.shoot()
-
         if self.keys[pyasge.KEYS.KEY_C]:
             if event.action is pyasge.KEYS.KEY_PRESSED:
-                self.hud.coords_on = not self.hud.coords_on
+                self.hud.switch_coordinates()
 
         # To test player health system
         if self.keys[pyasge.KEYS.KEY_Q]:
@@ -136,8 +117,6 @@ class GamePlay(GameState):
 
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
 
-        # print(self.gems_in_level)
-
         if self.canbehit == False:
             self.iframes -= game_time.fixed_timestep
             if self.iframes < 0:
@@ -149,6 +128,13 @@ class GamePlay(GameState):
 
         self.player.move_player(game_time, self.keys, self.game_pad)
 
+        if self.player.game_pad_enabled:
+            if self.data.inputs.getGamePad(0).RIGHT_TRIGGER != -1.0:
+                self.player.shoot()
+        else:
+            if self.keys[pyasge.KEYS.KEY_SPACE]:
+                self.player.shoot()
+
         """
         Updating the enemy array, collision check between player and zombie is located here to reduce code complexity
         by removing another for loop
@@ -159,8 +145,9 @@ class GamePlay(GameState):
                 x.re_calc = True
 
         for enemy in self.data.enemies:
-            enemy.move_enemy(game_time, pyasge.Point2D(self.data.world_loc.x, self.data.world_loc.y), pyasge.Point2D(self.data.tile_loc.x, self.data.tile_loc.y))
-            enemy.update() # call the update function to change texture
+            enemy.move_enemy(game_time, pyasge.Point2D(self.data.world_loc.x, self.data.world_loc.y),
+                             pyasge.Point2D(self.data.tile_loc.x, self.data.tile_loc.y))
+            enemy.update()  # call the update function to change texture
             if self.canbehit:
                 if enemy.playerZombieCollision(pyasge.Point2D(self.data.tile_loc.x, self.data.tile_loc.y)):
                     self.receivedDamage()
@@ -179,30 +166,23 @@ class GamePlay(GameState):
         if self.canbehit:
             if self.data.enemy_projectiles.update_projectiles(game_time, self.player):
                 self.receivedDamage()
+
+        for item in self.data.collectibles:
+            if item.check_collision(self.player.sprite):
+                self.player.max_heal()
+                self.hud.health_bar.heal()
+                self.data.collectibles.remove(item)
+
         """
         Updating the gems, if all the gems are collected, the exit door opens
         If the player is close enough to the exit door, the game goes to the next level screen
         If the player was on the last level, the game goes to the win screen
         """
-        if self.gems_in_level > 0:
-            for gem in self.data.gems:
-                if gem.check_collision(self.player.sprite):
-                    # gem_loc = pyasge.Point2D((gem.sprite.x + gem.sprite.width * 0.5) / self.data.tile_size - 0.5,
-                    #                          (gem.sprite.y + gem.sprite.height * 0.5) / self.data.tile_size - 0.5)
-                    # print(f"Gem picked up from ({int(gem_loc.x)},{int(gem_loc.y)})")
-                    # for tile in self.data.map.layers[2].tiles:
-                    #     if tile.coordinate[0] == int(gem_loc.x) and tile.coordinate[1] == int(gem_loc.y):
-                    #         self.data.map.layers[2].tiles.remove(tile)
-                    if gem.id == 1:
-                        self.data.score += gem.value
-                        self.hud.update_score(self.data.score)
-                        self.data.gems.remove(gem)
-                        self.gems_in_level -= 1
-                        print(self.gems_in_level)
-                    if gem.id == 2:
-                        self.data.gems.remove(gem)
-                        self.player.health = 5
-                        self.hud.health_bar.heal()
+        for gem in self.data.gems:
+            if gem.check_collision(self.player.sprite):
+                self.data.score += gem.value
+                self.hud.update_score(self.data.score)
+                self.data.gems.remove(gem)
         else:
             if not self.exit_door.door_open:
                 self.exit_door.door_open = True
@@ -212,10 +192,6 @@ class GamePlay(GameState):
                     return GameStateID.WINNER_WINNER
                 else:
                     return GameStateID.NEXT_LEVEL
-
-        if self.player.game_pad_enabled:
-            if self.data.inputs.getGamePad(0).RIGHT_TRIGGER != -1.0:
-                self.player.shoot()
 
         if self.keys[pyasge.KEYS.KEY_ESCAPE]:
             return GameStateID.EXIT
@@ -234,10 +210,8 @@ class GamePlay(GameState):
         self.data.renderer.setProjectionMatrix(self.data.camera.camera.view)
         self.hud.render_hud(corner)
         self.data.map.render(self.data.renderer)
-        self.data.renderer.render(self.entrance_door.sprite)
-        self.data.renderer.render(self.exit_door.sprite)
-        self.data.renderer.render(self.player.sprite)
-        self.player.render_bullets()
+        for item in self.update_list:
+            item.render()
         for enemy in self.data.enemies:
             self.data.renderer.render(enemy.sprite)
         for projectile in self.data.enemy_projectiles.projectiles:
@@ -246,11 +220,11 @@ class GamePlay(GameState):
         for gem in self.data.gems:
             self.data.renderer.render(gem.sprite)
 
+        for item in self.data.collectibles:
+            self.data.renderer.render(item.sprite)
+
         for vase in self.data.breakables:
             self.data.renderer.render(vase.sprite)
-
-        for enemy in self.data.enemies:
-            self.data.renderer.render(enemy.sprite)
 
 
 

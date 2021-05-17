@@ -23,9 +23,20 @@ class GameData:
         self.enemy_projectiles = None
         self.breakables = None
         self.gems = None
+        self.collectibles = None
 
         self.tile_size = int(64)
         self.world_loc = pyasge.Point2D(0, 0)
         self.tile_loc = pyasge.Point2D(0, 0)
         self.level_selected = 1
         self.score = 0
+
+        self.z_order = {
+            'floor': 1,
+            'wall': 2,
+            'collectibles': 3,
+            'projectiles': 4,
+            'enemy': 5,
+            'player': 6,
+            'UI': 10
+        }

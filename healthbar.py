@@ -32,6 +32,7 @@ class Heart:
         self.SPRITE_SIZE = pyasge.Point2D(13, 12)
         self.position = pyasge.Point2D()
         self.init_hearts()
+        self.sprite.z_order = 5
 
     def set_sprite(self, x: int, y: int, sprite: pyasge.Sprite()):
         sprite.src_rect[pyasge.Sprite.SourceRectIndex.START_X] = int(x)

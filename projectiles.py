@@ -1,6 +1,7 @@
 import pyasge
 from bullet import Bullet, BulletType
 from gem import Gem
+from medkit import Medkit
 
 
 class Projectiles:
@@ -9,10 +10,10 @@ class Projectiles:
         self.projectiles = []
 
     def shoot(self, spawn: pyasge.Point2D, direction: pyasge.Point2D):
-        self.projectiles.append(Bullet(spawn, direction, 'player'))
+        self.projectiles.append(Bullet(spawn, direction, 'player', self.data.z_order['projectiles']))
 
     def zombie_shoot(self, spawn: pyasge.Point2D, direction: pyasge.Point2D):
-        self.projectiles.append(Bullet(spawn, direction, 'enemy'))
+        self.projectiles.append(Bullet(spawn, direction, 'enemy', self.data.z_order['projectiles']))
 
     def update_projectiles(self, game_time: pyasge.GameTime, player):
         for bullet in self.projectiles:
@@ -38,8 +39,12 @@ class Projectiles:
                             x = int(vase.sprite.x / self.data.tile_size)
                             y = int(vase.sprite.y / self.data.tile_size)
                             self.data.map.cost_map[int(y)][int(x)] = 1
-                            self.data.gems.append(Gem(pyasge.Point2D((x + 0.5) * self.data.tile_size,
-                                                                     (y + 0.5) * self.data.tile_size)))
+                            if Medkit.drop_medkit(player.health):
+                                self.data.collectibles.append(Medkit(pyasge.Point2D((x + 0.5) * self.data.tile_size,
+                                                                                    (y + 0.5) * self.data.tile_size)))
+                            else:
+                                self.data.gems.append(Gem(pyasge.Point2D((x + 0.5) * self.data.tile_size,
+                                                                         (y + 0.5) * self.data.tile_size)))
             elif bullet.bullet_type == BulletType.Enemy:
                 if self.check_collision(bullet.centre(), player.sprite):
                     self.projectiles.remove(bullet)

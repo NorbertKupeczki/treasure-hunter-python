@@ -6,14 +6,17 @@ from enemyMain import EnemyMain
 
 class Enemy(EnemyMain):
 
-    def __init__(self, data, start_pos: pyasge.Point2D, Range, health, speed) -> None:
-        super().__init__(data, start_pos, Range, health ,speed)
-
+    def __init__(self, data, start_pos: pyasge.Point2D) -> None:
+        super().__init__(data, start_pos)
+        self.range = 5
+        self.current_hp = 5
+        self.starting_hp = 5
+        self.enemy_speed = 60
 
     def move_enemy(self, game_time: pyasge.GameTime, player_location: pyasge.Point2D, player_location_tile: pyasge.Point2D):
 
         self.enemy_curr_tile_cord = (int(((self.sprite.x + self.sprite.width * 0.5) / self.data.tile_size)),
-                                int((self.sprite.y + self.sprite.height * 0.5) / self.data.tile_size))
+                                     int((self.sprite.y + self.sprite.height * 0.5) / self.data.tile_size))
 
         distance = EnemyMain.distanceToPlayer(self, player_location_tile.x, player_location_tile.y, self.enemy_curr_tile_cord)
 

@@ -2,7 +2,8 @@ import pyasge
 
 
 class Door:
-    def __init__(self, position: pyasge.Point2D):
+    def __init__(self, position: pyasge.Point2D, data):
+        self.data = data
         self.sprite = pyasge.Sprite()
         self.sprite.loadTexture("/data/images/door.png")
         self.door_states = {
@@ -15,7 +16,7 @@ class Door:
         self.sprite.x = position.x - self.sprite.width * 0.25
         self.sprite.y = position.y - self.sprite.height * 0.25
         self.sprite.scale = 1.2
-        self.sprite.z_order = 2
+        self.sprite.z_order = self.data.z_order['wall']
         self.door_open = False
         self.elapsed_time = 0.0
 
@@ -25,7 +26,8 @@ class Door:
         self.sprite.height = int(self.sprite.getTexture().height * 0.25) - 2
 
     def get_centre(self) -> pyasge.Point2D:
-        sprite_centre = pyasge.Point2D(self.sprite.x + self.sprite.width * 0.5, self.sprite.y + self.sprite.height * 0.5)
+        sprite_centre = pyasge.Point2D(self.sprite.x + self.sprite.width * 0.5,
+                                       self.sprite.y + self.sprite.height * 0.5)
         return sprite_centre
 
     def update(self, game_time: pyasge.GameTime):
@@ -40,3 +42,6 @@ class Door:
                 self.set_sprite(self.door_states['open'])
 
             self.elapsed_time += game_time.fixed_timestep
+
+    def render(self):
+        self.data.renderer.render(self.sprite)
