@@ -6,6 +6,7 @@ from rangedEnemy import EnemyR
 from door import Door
 from hud import HUD
 from projectiles import Projectiles
+from maploader import MapLoader
 
 from map import Map
 
@@ -20,11 +21,7 @@ class GamePlay(GameState):
         self.data.enemy_projectiles = Projectiles(data)
         self.update_list = []
 
-        self.data.gems = []
-        self.data.enemies = []
-        self.data.breakables = []
-        self.data.collectibles = []
-        self.load_game_map(self.data.level_selected)
+        MapLoader.load_game_map(self.data)
 
         # initialising HUD and the player
         self.hud = HUD(data)
@@ -62,28 +59,6 @@ class GamePlay(GameState):
         self.game_pad = self.data.inputs.getGamePad(0)
 
         self.enemies_left = 0
-
-    def load_game_map(self, level_num) -> None:
-        self.data.map = Map(str(level_num))
-
-        for gem in self.data.map.layers[2].tiles:
-            self.data.gems.append(Gem(pyasge.Point2D((gem.coordinate[0] + 0.5) * self.data.tile_size,
-                                                     (gem.coordinate[1] + 0.5) * self.data.tile_size)))
-
-        ranged_enemy_counter = 0
-        for enemy in self.data.map.layers[3].tiles:
-            ranged_enemy_counter += 1
-            if ranged_enemy_counter == 3:
-                self.data.enemies.append(EnemyR(self.data, pyasge.Point2D(enemy.coordinate[0], enemy.coordinate[1])))
-                ranged_enemy_counter = 0
-            else:
-                self.data.enemies.append(Enemy(self.data, pyasge.Point2D(enemy.coordinate[0], enemy.coordinate[1])))
-
-        self.enemies_left = len(self.data.enemies)
-
-        for breakable in self.data.map.layers[4].tiles:
-            self.data.breakables.append(Vase(pyasge.Point2D(breakable.coordinate[0] * self.data.tile_size,
-                                                            breakable.coordinate[1] * self.data.tile_size)))
 
     def input(self, event: pyasge.KeyEvent) -> None:
         if event.action is not pyasge.KEYS.KEY_REPEATED:
@@ -172,17 +147,16 @@ class GamePlay(GameState):
                 self.player.max_heal()
                 self.hud.health_bar.heal()
                 self.data.collectibles.remove(item)
-
         """
         Updating the gems, if all the gems are collected, the exit door opens
         If the player is close enough to the exit door, the game goes to the next level screen
         If the player was on the last level, the game goes to the win screen
         """
-        for gem in self.data.gems:
-            if gem.check_collision(self.player.sprite):
-                self.data.score += gem.value
-                self.hud.update_score(self.data.score)
-                self.data.gems.remove(gem)
+        if self.data.gems:
+            for gem in self.data.gems:
+                if gem.check_collision(self.player.sprite):
+                    self.data.score += gem.value
+                    self.data.gems.remove(gem)
         else:
             if not self.exit_door.door_open:
                 self.exit_door.door_open = True
@@ -192,6 +166,8 @@ class GamePlay(GameState):
                     return GameStateID.WINNER_WINNER
                 else:
                     return GameStateID.NEXT_LEVEL
+
+        self.hud.update_score(self.data.score)
 
         if self.keys[pyasge.KEYS.KEY_ESCAPE]:
             return GameStateID.EXIT

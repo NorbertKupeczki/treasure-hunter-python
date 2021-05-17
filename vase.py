@@ -4,7 +4,7 @@ from enum import IntEnum
 
 
 class Vase:
-    def __init__(self, spawn: pyasge.Point2D):
+    def __init__(self, spawn: pyasge.Point2D, z_order: int):
         self.sprite = pyasge.Sprite()
         self.sprite.x = spawn.x - self.sprite.width * 0.5
         self.sprite.y = spawn.y - self.sprite.height * 0.5
@@ -12,7 +12,7 @@ class Vase:
                           "/data/images/vaseDamage2.png",
                           "/data/images/vaseDamage3.png"]
         self.sprite.loadTexture(self.imageList[0])
-        self.sprite.z_order = 2
+        self.sprite.z_order = z_order
         self.hp = 2
 
         self.prev_vase_condition = VaseConditions.INTACT

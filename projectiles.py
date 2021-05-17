@@ -25,26 +25,31 @@ class Projectiles:
                 for enemy in self.data.enemies:
                     if self.check_collision(bullet.centre(), enemy.sprite):
                         enemy.current_hp -= 1
+                        self.data.score += 5
                         self.projectiles.remove(bullet)
                         if enemy.current_hp <= 0:
+                            self.data.score += 10
                             self.data.enemies.remove(enemy)
 
                 for vase in self.data.breakables:
                     if self.check_collision(bullet.centre(), vase.sprite) and vase.hp > 0:
                         vase.hp -= 1
-                        print(vase.hp)
+                        self.data.score += 2
                         vase.update()
                         if vase.hp <= 0:
+                            self.data.score += 1
                             self.projectiles.remove(bullet)
                             x = int(vase.sprite.x / self.data.tile_size)
                             y = int(vase.sprite.y / self.data.tile_size)
                             self.data.map.cost_map[int(y)][int(x)] = 1
                             if Medkit.drop_medkit(player.health):
                                 self.data.collectibles.append(Medkit(pyasge.Point2D((x + 0.5) * self.data.tile_size,
-                                                                                    (y + 0.5) * self.data.tile_size)))
+                                                                                    (y + 0.5) * self.data.tile_size),
+                                                                     self.data.z_order['collectibles']))
                             else:
                                 self.data.gems.append(Gem(pyasge.Point2D((x + 0.5) * self.data.tile_size,
-                                                                         (y + 0.5) * self.data.tile_size)))
+                                                                         (y + 0.5) * self.data.tile_size),
+                                                          self.data.z_order['collectibles']))
             elif bullet.bullet_type == BulletType.Enemy:
                 if self.check_collision(bullet.centre(), player.sprite):
                     self.projectiles.remove(bullet)

@@ -2,10 +2,11 @@ import pyasge
 
 
 class Gem:
-    def __init__(self, spawn: pyasge.Point2D):
+    def __init__(self, spawn: pyasge.Point2D, z_order: int):
         self.value = 15
         self.sprite = pyasge.Sprite()
         self.sprite.loadTexture("/data/images/jewel.png")
+        self.sprite.z_order = z_order
         self.sprite.x = spawn.x - self.sprite.width * 0.5
         self.sprite.y = spawn.y - self.sprite.height * 0.5
 
