@@ -7,7 +7,7 @@ class GameOver(GameState):
         super().__init__(data)
         self.id = GameStateID.GAME_OVER
 
-        self.texts = [pyasge.Text(self.data.fonts['Title_text'], "Try again!\n"),
+        self.texts = [pyasge.Text(self.data.fonts['title_text'], "Try again!\n"),
                       pyasge.Text(self.data.fonts['main_text'], "Main Menu"),
                       pyasge.Text(self.data.fonts['main_text'], "Quit"),
                       pyasge.Text(self.data.fonts['hud_text'], "Navigate the menu with the W and S keys, "
