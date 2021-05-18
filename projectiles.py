@@ -32,13 +32,15 @@ class Projectiles:
                             self.data.enemies.remove(enemy)
 
                 for vase in self.data.breakables:
-                    if self.check_collision(bullet.centre(), vase.sprite) and vase.hp > 0:
+                    tip = pyasge.Point2D(bullet.centre().x + bullet.velocity.x * 12,
+                                         bullet.centre().y + bullet.velocity.y * 12)
+                    if self.check_collision(tip, vase.sprite) and vase.hp > 0:
                         vase.hp -= 1
+                        self.projectiles.remove(bullet)
                         self.data.score += 2
                         vase.update()
                         if vase.hp <= 0:
                             self.data.score += 1
-                            self.projectiles.remove(bullet)
                             x = int(vase.sprite.x / self.data.tile_size)
                             y = int(vase.sprite.y / self.data.tile_size)
                             self.data.map.cost_map[int(y)][int(x)] = 1

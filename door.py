@@ -25,8 +25,8 @@ class Door:
         self.sprite.height = int(self.sprite.getTexture().height * 0.25) - 2
 
     def get_centre(self) -> pyasge.Point2D:
-        sprite_centre = pyasge.Point2D(self.sprite.x + self.sprite.width * 0.5,
-                                       self.sprite.y + self.sprite.height * 0.5)
+        sprite_centre = pyasge.Point2D(self.sprite.x + self.sprite.width * 0.6,
+                                       self.sprite.y + self.sprite.height * 0.6)
         return sprite_centre
 
     def update(self, game_time: pyasge.GameTime):

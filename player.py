@@ -22,7 +22,6 @@ class Player:
         self.sprite.y = self.data.map.starting_location.y
         self.player_speed = 300
         self.velocity = pyasge.Point2D()
-        self.game_pad_enabled = False
         self.game_pad_sensitivity = 0.2
         self.facing = pyasge.Point2D(0, 1)
         self.projectiles = Projectiles(data)
@@ -48,7 +47,7 @@ class Player:
             self.invulnerable = 0.0
 
     def move_player(self, game_time: pyasge.GameTime, keys, game_pad):
-        if game_pad.connected and self.game_pad_enabled:
+        if game_pad.connected and self.data.game_pad_enabled:
             if abs(game_pad.x) > self.game_pad_sensitivity:
                 self.velocity.x = game_pad.x
             else:
@@ -97,7 +96,7 @@ class Player:
         delta = pyasge.Point2D(self.player_speed * self.velocity.x * game_time.fixed_timestep,
                                self.player_speed * self.velocity.y * game_time.fixed_timestep)
 
-        delta = self.check_collision(delta.x, delta.y)
+        delta = self.check_collision(delta)
 
         self.sprite.x = self.sprite.x + delta.x
         self.sprite.y = self.sprite.y + delta.y
@@ -111,30 +110,30 @@ class Player:
         self.sprite.height = self.SPRITE_SIZE.y
 
     def get_sprite(self) -> pyasge.Point2D:
-        sprite_centre = pyasge.Point2D(self.sprite.x + self.sprite.width * 0.5,
-                                       self.sprite.y + self.sprite.height * 0.5)
+        sprite_centre = pyasge.Point2D(self.sprite.x + self.SPRITE_SIZE.x * 0.5,
+                                       self.sprite.y + self.SPRITE_SIZE.y * 0.5)
         self.data.world_loc = sprite_centre
         self.data.tile_loc = pyasge.Point2D(int(sprite_centre.x / self.data.tile_size),
                                             int(sprite_centre.y / self.data.tile_size))
         return sprite_centre
 
-    def check_collision(self, dx: float, dy: float) -> pyasge.Point2D():
+    def check_collision(self, delta: pyasge.Point2D) -> pyasge.Point2D():
         bounds = [self.sprite.getWorldBounds().v1,
                   self.sprite.getWorldBounds().v2,
                   self.sprite.getWorldBounds().v3,
                   self.sprite.getWorldBounds().v4]
 
         for x in bounds:
-            if not self.is_passable(pyasge.Point2D(x.x + dx, x.y)):
-                dx = 0
-            if not self.is_passable(pyasge.Point2D(x.x, x.y + dy)):
-                dy = 0
+            if not self.is_passable(pyasge.Point2D(x.x + delta.x, x.y)):
+                delta.x = 0
+            if not self.is_passable(pyasge.Point2D(x.x, x.y + delta.y)):
+                delta.y = 0
 
-        return pyasge.Point2D(dx, dy)
+        return delta
 
     def toggle_game_pad(self) -> bool:
-        self.game_pad_enabled = not self.game_pad_enabled
-        return self.game_pad_enabled
+        self.data.game_pad_enabled = not self.data.game_pad_enabled
+        return self.data.game_pad_enabled
 
     def max_heal(self):
         self.health = self.HEALTH

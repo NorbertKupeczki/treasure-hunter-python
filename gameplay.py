@@ -27,6 +27,7 @@ class GamePlay(GameState):
 
         # register the key handler for this class
         self.data.inputs.addCallback(pyasge.EventType.E_KEY, self.input)
+        self.game_pad_cd = 0.3
 
         # track key states
         self.keys = {
@@ -34,14 +35,11 @@ class GamePlay(GameState):
             pyasge.KEYS.KEY_D: False,
             pyasge.KEYS.KEY_W: False,
             pyasge.KEYS.KEY_S: False,
-            pyasge.KEYS.KEY_EQUAL: False,
-            pyasge.KEYS.KEY_MINUS: False,
             pyasge.KEYS.KEY_SPACE: False,
             pyasge.KEYS.KEY_G: False,
             pyasge.KEYS.KEY_C: False,
-            pyasge.KEYS.KEY_ESCAPE: False,
-            pyasge.KEYS.KEY_Q: False,  # To test player health system
-            pyasge.KEYS.KEY_E: False  # To test player health system
+            pyasge.KEYS.KEY_H: False,
+            pyasge.KEYS.KEY_ESCAPE: False
         }
 
         self.game_pad = self.data.inputs.getGamePad(0)
@@ -67,18 +65,28 @@ class GamePlay(GameState):
             if event.action is pyasge.KEYS.KEY_PRESSED:
                 self.hud.switch_coordinates()
 
-        # To test player health system
-        if self.keys[pyasge.KEYS.KEY_Q]:
+        if self.keys[pyasge.KEYS.KEY_H]:
             if event.action is pyasge.KEYS.KEY_PRESSED:
-                self.player.health -= 1
-                self.hud.health_bar.lose_health(self.player.health)
-
-        if self.keys[pyasge.KEYS.KEY_E]:
-            if event.action is pyasge.KEYS.KEY_PRESSED:
-                self.player.health = 5
-                self.hud.health_bar.heal()
+                self.hud.toggle_help()
 
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
+        if self.game_pad_cd:
+            self.game_pad_cd -= game_time.fixed_timestep
+            if self.game_pad_cd < 0.03:
+                self.game_pad_cd = 0.0
+
+        if self.data.inputs.getGamePad(0).Y and not self.game_pad_cd and self.data.inputs.getGamePad(0).connected:
+            self.player.toggle_game_pad()
+            self.game_pad_cd += 0.2
+
+        if self.data.inputs.getGamePad(0).X and not self.game_pad_cd and self.data.inputs.getGamePad(0).connected:
+            self.hud.toggle_help()
+            self.game_pad_cd += 0.2
+
+        if self.data.inputs.getGamePad(0).A and not self.game_pad_cd and self.data.inputs.getGamePad(0).connected:
+            self.hud.switch_coordinates()
+            self.game_pad_cd += 0.2
+
         for item in self.update_list:
             item.update(game_time)
 
@@ -88,26 +96,13 @@ class GamePlay(GameState):
         Updating the enemy array, collision check between player and zombie is located here to reduce code complexity
         by removing another for loop
         """
-        if len(self.data.enemies) != self.enemies_left:
-            self.enemies_left = len(self.data.enemies)
-            for enemy in self.data.enemies:
-                enemy.re_calc = True
-
         for enemy in self.data.enemies:
             enemy.move_enemy(game_time, pyasge.Point2D(self.data.world_loc.x, self.data.world_loc.y),
                              pyasge.Point2D(self.data.tile_loc.x, self.data.tile_loc.y))
-            enemy.update()  # call the update function to change texture
+            enemy.update()
             if not self.player.invulnerable:
                 if enemy.playerZombieCollision(pyasge.Point2D(self.data.tile_loc.x, self.data.tile_loc.y)):
                     self.player.suffer_damage(self.hud.health_bar)
-
-        for x in range(len(self.data.enemies)):
-            saved = x
-            for z in range(len(self.data.enemies)):
-                if z != saved:
-                    if self.data.enemies[x].saved_tile[0] == self.data.enemies[z].enemy_curr_tile_cord[0] and self.data.enemies[x].saved_tile[1] == self.data.enemies[z].enemy_curr_tile_cord[1]:
-                        self.data.enemies[x].re_path(self.data.enemies[z].enemy_curr_tile_cord[0], self.data.enemies[z].enemy_curr_tile_cord[1])  # should send the coords of the obstacle so they dont overlap by mistake
-
         """
         Updating enemy projectiles, if the function returns True,
         the player loses 1 HP and the health bar gets updated
@@ -135,7 +130,8 @@ class GamePlay(GameState):
             if not self.exit_door.door_open:
                 self.exit_door.door_open = True
 
-            if pyasge.Point2D.distance(self.player.get_sprite(), self.exit_door.get_centre()) <= self.data.tile_size:
+            if pyasge.Point2D.distance(self.player.get_sprite(),
+                                       self.exit_door.get_centre()) <= self.data.tile_size * 0.25:
                 if self.data.level_selected == 7:
                     return GameStateID.WINNER_WINNER
                 else:
@@ -143,8 +139,8 @@ class GamePlay(GameState):
 
         self.hud.update_score(self.data.score)
 
-        if self.keys[pyasge.KEYS.KEY_ESCAPE]:
-            return GameStateID.EXIT
+        if self.keys[pyasge.KEYS.KEY_ESCAPE] or (self.data.inputs.getGamePad(0).B and self.data.game_pad_enabled):
+            return GameStateID.START_MENU
         elif self.player.health <= 0:
             return GameStateID.GAME_OVER
         else:
@@ -170,6 +166,3 @@ class GamePlay(GameState):
 
         for vase in self.data.breakables:
             self.data.renderer.render(vase.sprite)
-
-
-

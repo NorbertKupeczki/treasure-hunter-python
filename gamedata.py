@@ -14,6 +14,7 @@ class GameData:
     def __init__(self) -> None:
         self.fonts = {}
         self.inputs = None
+        self.game_pad_enabled = False
         self.renderer = None
         self.screen_size = {}
 

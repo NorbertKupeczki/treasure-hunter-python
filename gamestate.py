@@ -31,11 +31,25 @@ class GameState(ABC):
     and provide definitions for the functions below. You should
     not need to instantiate this class directly.
     """
-
     @abstractmethod
     def __init__(self, data: GameData) -> None:
         self.id = GameStateID.UNKNOWN
         self.data = data
+        self.game_pad_cd = 0.3
+        self.GP_CD = 0.2
+        self.backgrounds = {
+            'main': '/data/images/backgrounds/main_bg.png',
+            'plain': '/data/images/backgrounds/plain_bg.png',
+            'next_lvl': '/data/images/backgrounds/nextlvl_bg.png',
+            'winner': '/data/images/backgrounds/win_bg.png',
+            'game_over': '/data/images/backgrounds/gameover_bg.png'
+        }
+        self.colours = {
+            'main': pyasge.COLOURS.WHITE,
+            'accent': pyasge.COLOURS.GOLD
+        }
+        self.background = pyasge.Sprite()
+        self.background.z_order = -1
 
     @abstractmethod
     def update(self, game_time: pyasge.GameTime) -> GameStateID:
@@ -50,5 +64,11 @@ class GameState(ABC):
         for text in text_array:
             text.position = [screen_size[0] * 0.5 - text.width * 0.5,
                              screen_size[1] * y_offset - text.height * 0.5 + 60 * index]
-            text.colour = pyasge.COLOURS.BLACK
+            text.colour = self.colours['main']
             index += 1
+
+    def gp_cd_update(self, game_time: pyasge.GameTime):
+        if self.game_pad_cd:
+            self.game_pad_cd -= game_time.fixed_timestep
+            if self.game_pad_cd < 0.03:
+                self.game_pad_cd = 0.0

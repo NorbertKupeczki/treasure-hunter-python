@@ -68,11 +68,23 @@ class Node:
         if self.x < self.WIDTH - 1 and not grid[self.y][self.x + 1] > 100:
             self.neighbors.append(Node(self.y, self.x + 1))
 
+        if self.x < self.WIDTH - 1 and self.y < self.HEIGHT - 1 and not grid[self.y + 1][self.x + 1] > 100:
+            self.neighbors.append(Node(self.y + 1, self.x + 1))
+
         if self.y < self.HEIGHT - 1 and not grid[self.y + 1][self.x] > 100:
             self.neighbors.append(Node(self.y + 1, self.x))
+
+        if self.y < self.HEIGHT - 1 and self.x > 0 and not grid[self.y + 1][self.x - 1] > 100:
+            self.neighbors.append(Node(self.y + 1, self.x - 1))
 
         if self.x > 0 and not grid[self.y][self.x - 1] > 100:
             self.neighbors.append(Node(self.y, self.x - 1))
 
+        if self.x > 0 and self.y > 0 and not grid[self.y - 1][self.x - 1] > 100:
+            self.neighbors.append(Node(self.y - 1, self.x - 1))
+
         if self.y > 0 and not grid[self.y - 1][self.x] > 100:
             self.neighbors.append(Node(self.y - 1, self.x))
+
+        if self.y > 0 and self.x < self.WIDTH - 1 and not grid[self.y - 1][self.x + 1] > 100:
+            self.neighbors.append(Node(self.y - 1, self.x + 1))

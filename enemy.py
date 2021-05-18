@@ -1,7 +1,6 @@
 import pyasge
 from A_star_pathfinding import Pathfinding
 from pathfinder import PathFinder
-
 from enemyMain import EnemyMain
 
 
@@ -16,12 +15,14 @@ class Enemy(EnemyMain):
         self.pf = PathFinder(self.data)
         self.destination = None
 
-    def move_enemy(self, game_time: pyasge.GameTime, player_location: pyasge.Point2D, player_location_tile: pyasge.Point2D):
+    def move_enemy(self, game_time: pyasge.GameTime, player_location: pyasge.Point2D,
+                   player_location_tile: pyasge.Point2D):
 
         self.enemy_curr_tile_cord = (int(((self.sprite.x + self.sprite.width * 0.5) / self.data.tile_size)),
                                      int((self.sprite.y + self.sprite.height * 0.5) / self.data.tile_size))
 
-        distance = EnemyMain.distanceToPlayer(self, player_location_tile.x, player_location_tile.y, self.enemy_curr_tile_cord)
+        distance = EnemyMain.distanceToPlayer(self, player_location_tile.x, player_location_tile.y,
+                                              self.enemy_curr_tile_cord)
 
         if distance < self.range:
             player_pos = player_location
@@ -33,7 +34,8 @@ class Enemy(EnemyMain):
                 self.desired_path.clear()
                 self.old_player_pos = player_location_tile
 
-                if int(self.enemy_curr_tile_cord[0]) == int(player_location_tile.x) and int(self.enemy_curr_tile_cord[1]) == int(player_location_tile.y):
+                if int(self.enemy_curr_tile_cord[0]) == int(player_location_tile.x) \
+                        and int(self.enemy_curr_tile_cord[1]) == int(player_location_tile.y):
                     self.desired_path.clear()
                     self.destination = None
 
@@ -48,41 +50,43 @@ class Enemy(EnemyMain):
 
                     # if len(self.desired_path) > 30:
                     #     self.desired_path.clear()
-                    #     pass
-                    # else:
-                    self.desired_path.pop()
+                    if len(self.desired_path) > 1:
+                        self.desired_path.pop(0)
 
-            if self.desired_path:
-                if self.destination is None:
-                    self.destination = self.desired_path.pop(0)
+        if self.desired_path:
+            if self.destination is None:
+                self.destination = self.desired_path.pop(0)
 
-            if self.destination is not None:
-                player_pos.y = int(self.destination[1] * self.data.tile_size)
-                player_pos.x = int(self.destination[0] * self.data.tile_size)
+        if self.destination is not None:
+            player_pos = pyasge.Point2D()
+            player_pos.y = int(self.destination[1] * self.data.tile_size)
+            player_pos.x = int(self.destination[0] * self.data.tile_size)
 
-                if abs(int(self.destination[0] * self.data.tile_size) - int(self.sprite.x)) < 2:
-                    self.velocity.x = 0
-                elif player_pos.x > self.sprite.x:
-                    self.velocity.x = 1
-                elif player_pos.x < self.sprite.x:
-                    self.velocity.x = -1
+            if abs(int(self.destination[0] * self.data.tile_size) - int(self.sprite.x)) < 2:
+                self.velocity.x = 0
+            elif player_pos.x > self.sprite.x:
+                self.velocity.x = 1
+            elif player_pos.x < self.sprite.x:
+                self.velocity.x = -1
 
-                if abs(int(self.destination[1] * self.data.tile_size) - int(self.sprite.y)) < 2:
-                    self.velocity.y = 0
-                elif player_pos.y > self.sprite.y:
-                    self.velocity.y = 1
-                elif player_pos.y < self.sprite.y:
-                    self.velocity.y = -1
+            if abs(int(self.destination[1] * self.data.tile_size) - int(self.sprite.y)) < 2:
+                self.velocity.y = 0
+            elif player_pos.y > self.sprite.y:
+                self.velocity.y = 1
+            elif player_pos.y < self.sprite.y:
+                self.velocity.y = -1
 
-                delta_x = self.enemy_speed * self.velocity.x * game_time.fixed_timestep
-                delta_y = self.enemy_speed * self.velocity.y * game_time.fixed_timestep
+            delta = pyasge.Point2D(self.enemy_speed * self.velocity.x * game_time.fixed_timestep,
+                                   self.enemy_speed * self.velocity.y * game_time.fixed_timestep)
 
-                self.sprite.x = self.sprite.x + delta_x
-                self.sprite.y = self.sprite.y + delta_y
+            delta = self.check_collision(delta)
 
-                curr_pos = pyasge.Point2D(self.sprite.x, self.sprite.y)
-                dest_pos = pyasge.Point2D(self.destination[0] * self.data.tile_size,
-                                          self.destination[1] * self.data.tile_size)
+            self.sprite.x = self.sprite.x + delta.x
+            self.sprite.y = self.sprite.y + delta.y
 
-                if pyasge.Point2D.distance(curr_pos, dest_pos) <= 1.5:
-                    self.destination = None
+            curr_pos = pyasge.Point2D(self.sprite.x, self.sprite.y)
+            dest_pos = pyasge.Point2D(self.destination[0] * self.data.tile_size,
+                                      self.destination[1] * self.data.tile_size)
+
+            if pyasge.Point2D.distance(curr_pos, dest_pos) <= 1.5:
+                self.destination = None

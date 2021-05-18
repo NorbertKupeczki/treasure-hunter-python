@@ -22,6 +22,8 @@ class MyASGEGame(pyasge.ASGEGame):
         self.data = GameData()
         self.data.inputs = self.inputs
         self.data.renderer = self.renderer
+        if self.data.inputs.getGamePad(0).connected:
+            self.data.game_pad_enabled = True
         self.data.fonts['title_text'] = self.renderer.loadFont("/data/fonts/oblivion-font.ttf", 60)
         self.data.fonts['main_text'] = self.renderer.loadFont("/data/fonts/oblivion-font.ttf", 40)
         self.data.fonts['hud_text'] = self.renderer.loadFont("/data/fonts/oblivion-font.ttf", 18)

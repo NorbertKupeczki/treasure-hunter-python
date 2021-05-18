@@ -10,17 +10,19 @@ class HUD:
         self.health_bar = HealthBar(data)
 
         self.ui = [
-            UIText(pyasge.Point2D(5, 20), pyasge.COLOURS.LIME, 'hud_text', "Score: " + str(self.data.score), self.data),
-            UIText(pyasge.Point2D(120, 20), pyasge.COLOURS.LIME, 'hud_text', "World: ", self.data),
-            UIText(pyasge.Point2D(300, 20), pyasge.COLOURS.LIME, 'hud_text', "Tile: ", self.data),
-            UIText(pyasge.Point2D(self.data.screen_size[0] - 100, 20), pyasge.COLOURS.LIME, 'hud_text',
+            UIText(pyasge.Point2D(5, 20), pyasge.COLOURS.WHITE, 'hud_text', "Score: " + str(self.data.score), self.data),
+            UIText(pyasge.Point2D(170, 20), pyasge.COLOURS.WHITE, 'hud_text', "World: ", self.data),
+            UIText(pyasge.Point2D(350, 20), pyasge.COLOURS.WHITE, 'hud_text', "Tile: ", self.data),
+            UIText(pyasge.Point2D(self.data.screen_size[0] - 100, 20), pyasge.COLOURS.WHITE, 'hud_text',
                    "Level: "+str(self.data.level_selected), self.data),
             UIImage(pyasge.Point2D(0, 0), "/data/images/bar.png", 0, data),
             UIImage(pyasge.Point2D(0, self.data.screen_size[1] - self.data.tile_size * 0.5),
-                    "/data/images/bar.png", 180, data)
+                    "/data/images/bar.png", 180, data),
+            UIImage(pyasge.Point2D(167, 157), "/data/images/controls.png", 0, data)
         ]
         self.ui[1].visible = False
         self.ui[2].visible = False
+        self.ui[6].visible = False
 
     def render_hud(self, corner: pyasge.Point2D):
         self.update_coordinates()
@@ -41,6 +43,9 @@ class HUD:
     def switch_coordinates(self):
         self.ui[1].visible = not self.ui[1].visible
         self.ui[2].visible = not self.ui[2].visible
+
+    def toggle_help(self):
+        self.ui[6].visible = not self.ui[6].visible
 
 
 class UIElement(ABC):
